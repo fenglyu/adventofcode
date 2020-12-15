@@ -33,7 +33,7 @@ func main() {
 	}
 
 	fmt.Println(len(report), len(report[0]), report[321][12])
-	fmt.Println(walk(report, 1, 1))
+	fmt.Println(walk(report, 3, 1))
 
 	fmt.Println(walk(report, 1, 1) * walk(report, 3, 1) * walk(report, 5, 1) * walk(report, 7, 1) * walk(report, 1, 2))
 }
