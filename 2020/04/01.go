@@ -55,6 +55,7 @@ func main() {
 	}
 
 	//fmt.Println(report)
+
 	count := 0
 	for _, v := range report {
 		if valid(v) {
@@ -106,16 +107,20 @@ func valid2(passport string) bool {
 		switch v {
 		case "byr":
 			value, _ := strconv.Atoi(fmap[v])
-			//fmt.Println("byr", value)
-			return regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2002 && value >= 1920
+			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2002 && value >= 1920) {
+				return false
+			}
 		case "iyr":
 			value, _ := strconv.Atoi(fmap[v])
-			//fmt.Println("iyr", value)
-			return regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2020 && value >= 2010
+			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2020 && value >= 2010) {
+				return false
+			}
 		case "eyr":
 			value, _ := strconv.Atoi(fmap[v])
-			//fmt.Println("eyr", value)
-			return regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2030 && value >= 2020
+			//fmt.Println("eyr value)
+			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2030 && value >= 2020) {
+				return false
+			}
 		case "hgt":
 			if !regexp.MustCompile(`(cm|in)$`).MatchString(fmap[v]) {
 				return false
@@ -123,25 +128,33 @@ func valid2(passport string) bool {
 			length := strings.TrimSuffix(fmap[v], "cm")
 			length = strings.TrimSuffix(fmap[v], "in")
 			l, _ := strconv.Atoi(length)
-			if strings.HasSuffix(fmap[v], "cm") {
-				return numRange(l, 150, 193)
+			if strings.HasSuffix(fmap[v], "cm") && !numRange(l, 150, 193) {
+				return false
 			}
-			if strings.HasSuffix(fmap[v], "in") {
-				return numRange(l, 59, 76)
+			if strings.HasSuffix(fmap[v], "in") && !numRange(l, 59, 76) {
+				return false
 			}
 		case "hcl":
-			return regexp.MustCompile(`^#[0-9a-f]{6}`).MatchString(fmap[v])
+			if !regexp.MustCompile(`^#[0-9a-f]{6}$`).MatchString(fmap[v]) {
+				return false
+			}
 		case "ecl":
 			test := []string{"amb", "blu", "brn", "gry", "grn", "hzl", "oth"}
 			flag := false
 			for _, l := range test {
-				if fmap[v] == l {
+				if strings.EqualFold(fmap[v], l) {
 					flag = true
 				}
 			}
-			return flag
+			if !flag {
+				return false
+			}
 		case "pid":
-			return regexp.MustCompile(`[0-9]{9}`).MatchString(fmap[v])
+			if !regexp.MustCompile(`[0-9]{9}`).MatchString(fmap[v]) {
+				return false
+			}
+		default:
+			return false
 		}
 	}
 
@@ -155,8 +168,5 @@ func checkValue(len int, min int, max int) bool{
 */
 
 func numRange(v int, min int, max int) bool {
-	if v >= min && v <= max {
-		return true
-	}
-	return false
+	return v >= min && v <= max
 }
