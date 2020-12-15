@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
-	//"strconv"
 )
 
 func main() {
@@ -35,11 +35,24 @@ func main() {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
+	sort.Ints(report)
+	//fmt.Println(expMap)
+	for l := 0; l < len(report)-3; l++ {
+		i, j := l+1, len(report)-1
+		for i < j {
+			sum := report[i] + report[j]
+			switch {
+			case sum == 2020-report[l]:
+				fmt.Println(report[i], report[l], report[j], report[i]*report[l]*report[j])
 
-	//fmt.Println(report)
-	for _, v := range report {
-		if _, ok := expMap[2020-v]; ok {
-			fmt.Println(v, 2020-v, v*(2020-v))
+				i++
+				j--
+			case sum < 2020-report[l]:
+				i++
+			case sum > 2020-report[l]:
+				j--
+			}
 		}
 	}
+
 }

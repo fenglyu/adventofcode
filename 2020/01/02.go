@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
-	//"strconv"
 )
 
 func main() {
@@ -22,7 +22,6 @@ func main() {
 	defer file.Close()
 
 	report := make([]int, 0)
-	expMap := make(map[int]bool)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -30,16 +29,24 @@ func main() {
 		line := scanner.Text()
 		expense, _ := strconv.Atoi(line)
 		report = append(report, expense)
-		expMap[expense] = true
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
-
+	sort.Ints(report)
 	//fmt.Println(report)
-	for _, v := range report {
-		if _, ok := expMap[2020-v]; ok {
-			fmt.Println(v, 2020-v, v*(2020-v))
+	i, j := 0, len(report)-1
+	for i < j {
+		sum := report[i] + report[j]
+		switch {
+		case sum == 2020:
+			fmt.Println(report[i], report[j])
+			i++
+			j--
+		case sum < 2020:
+			i++
+		case sum > 2020:
+			j--
 		}
 	}
 }
