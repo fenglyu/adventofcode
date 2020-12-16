@@ -65,12 +65,17 @@ func main() {
 	fmt.Println(count)
 
 	c := 0
-	for _, v := range report {
+	nums := make([]int, 0)
+	for i, v := range report {
 		if valid2(v) {
+			nums = append(nums, i)
 			c++
 		}
 	}
 	fmt.Println(c)
+	//fmt.Println(nums)
+	//fmt.Println(report[75])
+
 }
 
 func valid(passport string) bool {
@@ -83,90 +88,85 @@ func valid(passport string) bool {
 	return true
 }
 
-func valid2(passport string) bool {
-	fileds := []string{"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"} // "cid"
-	fmap := make(map[string]string)
-	//fmt.Println(passport)
+func checkValue(s string, len int, min int, max int) bool {
+	return regexp.MustCompile(fmt.Sprintf(`[\d]{%d}`, len)).MatchString(s) && numRange(s, min, max)
+}
 
-	//ff := regexp.MustCompile(`[_]+`).Split(passport, -1)
+func numRange(s string, min int, max int) bool {
+	v, _ := strconv.Atoi(s)
+	return v >= min && v <= max
+}
+
+func valid2(passport string) bool {
+
+	if !valid(passport) {
+		return false
+	}
+
 	ff := strings.Fields(passport)
 
 	if len(ff) < 7 || len(ff) > 8 {
 		return false
 	}
-	//fmt.Println(ff, len(ff))
-	//fmt.Println("-------------")
-	for _, v := range ff {
-		ts := strings.Split(v, ":")
-		//fmt.Println(ts)
-		fmap[ts[0]] = ts[1]
-	}
-	//fmt.Println(fmap)
 
-	for _, v := range fileds {
-		switch v {
+	for _, f := range ff {
+		ts := strings.Split(f, ":")
+		if ts[0] != "cid" && (ts[0] == "" || ts[1] == "") {
+			return false
+		}
+
+		switch ts[0] {
 		case "byr":
-			value, _ := strconv.Atoi(fmap[v])
-			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2002 && value >= 1920) {
+			if !checkValue(ts[1], 4, 1920, 2002) {
 				return false
 			}
 		case "iyr":
-			value, _ := strconv.Atoi(fmap[v])
-			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2020 && value >= 2010) {
+			if !checkValue(ts[1], 4, 2010, 2020) {
 				return false
 			}
 		case "eyr":
-			value, _ := strconv.Atoi(fmap[v])
-			//fmt.Println("eyr value)
-			if !(regexp.MustCompile(`[\d]{4}`).MatchString(fmap[v]) && value <= 2030 && value >= 2020) {
+			if !checkValue(ts[1], 4, 2020, 2030) {
 				return false
 			}
 		case "hgt":
-			if !regexp.MustCompile(`(cm|in)$`).MatchString(fmap[v]) {
+			if !regexp.MustCompile(`(cm|in)$`).MatchString(ts[1]) {
 				return false
 			}
-			length := strings.TrimSuffix(fmap[v], "cm")
-			length = strings.TrimSuffix(fmap[v], "in")
-			l, _ := strconv.Atoi(length)
-			if strings.HasSuffix(fmap[v], "cm") && !numRange(l, 150, 193) {
-				return false
-			}
-			if strings.HasSuffix(fmap[v], "in") && !numRange(l, 59, 76) {
-				return false
+			if strings.Contains(ts[1], "cm") {
+				ll := strings.TrimSuffix(ts[1], "cm")
+				if !numRange(ll, 150, 193) {
+					return false
+				}
+			} else if strings.Contains(ts[1], "in") {
+				ll := strings.TrimSuffix(ts[1], "in")
+				if !numRange(ll, 59, 76) {
+					return false
+				}
 			}
 		case "hcl":
-			if !regexp.MustCompile(`^#[0-9a-f]{6}$`).MatchString(fmap[v]) {
+			if !regexp.MustCompile(`^#[0-9a-f]{6}$`).MatchString(ts[1]) {
 				return false
 			}
 		case "ecl":
 			test := []string{"amb", "blu", "brn", "gry", "grn", "hzl", "oth"}
-			flag := false
+			f := false
 			for _, l := range test {
-				if strings.EqualFold(fmap[v], l) {
-					flag = true
+				if strings.EqualFold(ts[1], l) {
+					f = true
 				}
 			}
-			if !flag {
+			if !f {
 				return false
 			}
 		case "pid":
-			if !regexp.MustCompile(`[0-9]{9}`).MatchString(fmap[v]) {
+			if !regexp.MustCompile(`^[0-9]{9}$`).MatchString(ts[1]) {
 				return false
 			}
+
 		default:
-			return false
+			//fmt.Println("")
 		}
 	}
 
 	return true
-}
-
-/*
-func checkValue(len int, min int, max int) bool{
-	regexp.MustCompile(`[\d]{%s}`.).MatchString(fmap[v]) && value <= 2002 && value >= 1920
-}
-*/
-
-func numRange(v int, min int, max int) bool {
-	return v >= min && v <= max
 }
