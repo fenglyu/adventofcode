@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 )
 
 func parseBasedOnEmptyLine() []string {
@@ -82,16 +83,67 @@ func main() {
 
 	report := parseBasedOnEachLine()
 
-	sum := 0
+	//	sum := 0
+	//initColors := make([]string, 0)
+	stats := make(map[string][]string, 0)
 	for i, v := range report {
-		re := regexp.MustCompile(`(^.*)bag[s]? contain(?: [1-9] ([a-z ]*){1,} bag[s]?[,]?) [1-9] (shiny gold) bags`)
-		q := re.FindStringSubmatch(v)
-		//fmt.Printf("[%d]: %v\n", i, v)
+		/*
+			if regexp.MustCompile(`^(.*) bags contain.*[1-9] (shiny gold) bag[s]?`).MatchString(v) {
+				initColors = append(initColors)
+			}
+		*/
+		//fmt.Printf("[%d]: %s\n", i, v)
+		q := regexp.MustCompile(`([0-9]|bags|bag|,)`).Split(v, -1)
 		if len(q) > 0 {
 			fmt.Printf("[%d]: %q\n", i, q)
+			result := make([]string, 0)
+			for j, color := range q {
+				if j == 0 || colorIn(color, []string{"", "contain", ".", "contain no other"}) {
+					continue
+				}
+				result = append(result, color)
+			}
+			fmt.Println(result)
+			stats[strings.Trim(q[0], " ")] = result
+		}
+		//}
+	}
+
+	//	fmt.Println(stats)
+	bagBelongTo("shiny gold", stats)
+
+}
+
+func colorIn(color string, exa []string) bool {
+	for _, v := range exa {
+		if strings.EqualFold(strings.Trim(color, " "), v) {
+			return true
+		}
+	}
+	return false
+}
+
+func bagBelongTo(bags string, stats map[string][]string) []string {
+	outerBag := make([]string, 0)
+	for k, v := range stats {
+		if colorIn(bags, v) {
+			outerBag = append(outerBag, k)
+		}
+	}
+	return outerBag
+}
+
+func countBags(bags string, stats map[string][]string) int {
+	sum := 0
+	for k, v := range stats {
+		if colorIn(bags, v) {
 			sum++
+			return countBags(k, stats)
 		}
 	}
 
-	fmt.Println(sum)
+	if sum == 0 {
+		return 0
+	}
+	return sum
 }
