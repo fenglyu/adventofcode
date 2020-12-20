@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 )
 
 func parseBasedOnEmptyLine() []string {
@@ -74,10 +75,23 @@ func parseBasedOnEachLine() []string {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
+	return report
 }
 
 func main() {
 
-	report := parseBasedOnEmptyLine()
-	fmt.Println(report)
+	report := parseBasedOnEachLine()
+
+	sum := 0
+	for i, v := range report {
+		re := regexp.MustCompile(`(^.*)bag[s]? contain(?: [1-9] ([a-z ]*){1,} bag[s]?[,]?) [1-9] (shiny gold) bags`)
+		q := re.FindStringSubmatch(v)
+		//fmt.Printf("[%d]: %v\n", i, v)
+		if len(q) > 0 {
+			fmt.Printf("[%d]: %q\n", i, q)
+			sum++
+		}
+	}
+
+	fmt.Println(sum)
 }
