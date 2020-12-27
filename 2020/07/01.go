@@ -86,7 +86,7 @@ func main() {
 	//	sum := 0
 	//initColors := make([]string, 0)
 	stats := make(map[string][]string, 0)
-	for i, v := range report {
+	for _, v := range report {
 		/*
 			if regexp.MustCompile(`^(.*) bags contain.*[1-9] (shiny gold) bag[s]?`).MatchString(v) {
 				initColors = append(initColors)
@@ -95,7 +95,7 @@ func main() {
 		//fmt.Printf("[%d]: %s\n", i, v)
 		q := regexp.MustCompile(`([0-9]|bags|bag|,)`).Split(v, -1)
 		if len(q) > 0 {
-			fmt.Printf("[%d]: %q\n", i, q)
+			//fmt.Printf("[%d]: %q\n", i, q)
 			result := make([]string, 0)
 			for j, color := range q {
 				if j == 0 || colorIn(color, []string{"", "contain", ".", "contain no other"}) {
@@ -103,20 +103,27 @@ func main() {
 				}
 				result = append(result, color)
 			}
-			fmt.Println(result)
+			//fmt.Println(result)
 			stats[strings.Trim(q[0], " ")] = result
 		}
 		//}
 	}
 
 	//	fmt.Println(stats)
-	bagBelongTo("shiny gold", stats)
+	resultBags := bagBelongTo("shiny gold", stats)
+	fmt.Println("sum: ")
 
+	for i, r := range resultBags {
+		fmt.Printf("[%d] %s\n", i, r)
+	}
+
+	result := countBags("shiny gold", stats, 0)
+	fmt.Println("result: ", result)
 }
 
 func colorIn(color string, exa []string) bool {
 	for _, v := range exa {
-		if strings.EqualFold(strings.Trim(color, " "), v) {
+		if strings.EqualFold(strings.Trim(color, " "), strings.Trim(v, " ")) {
 			return true
 		}
 	}
@@ -133,17 +140,20 @@ func bagBelongTo(bags string, stats map[string][]string) []string {
 	return outerBag
 }
 
-func countBags(bags string, stats map[string][]string) int {
+func countBags(bags string, stats map[string][]string, lvl int) int {
 	sum := 0
+	pBags := make([]string, 0)
 	for k, v := range stats {
 		if colorIn(bags, v) {
 			sum++
-			return countBags(k, stats)
+			pBags = append(pBags, k)
 		}
 	}
-
-	if sum == 0 {
-		return 0
+	fmt.Println("level >", lvl, "bags >", bags, " pBags >", pBags)
+	lvl++
+	for _, v := range pBags {
+		sum += countBags(v, stats, lvl)
 	}
+
 	return sum
 }
