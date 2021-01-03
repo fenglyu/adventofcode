@@ -74,6 +74,7 @@ func parseBasedOnEachLine() []string {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
+	return report
 }
 
 func main() {

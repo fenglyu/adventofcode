@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -36,7 +37,7 @@ func parseBasedOnEmptyLine() []string {
 		}
 
 		if atEOF {
-			return len(data), data[0:len(data)], nil
+			return len(data), data[0:], nil
 		}
 		// Request more data
 		return 0, nil, nil
@@ -57,6 +58,7 @@ func parseBasedOnEmptyLine() []string {
 
 func parseBasedOnEachLine() []string {
 	fN := flag.String("file", "input", "File name")
+	//fN := flag.String("file", "test_input", "File name")
 	flag.Parse()
 
 	file, err := os.Open(*fN)
@@ -79,46 +81,76 @@ func parseBasedOnEachLine() []string {
 	return report
 }
 
+var calc map[int]bool
+
+type Record struct {
+	lineno int
+	key    string
+	nums   []int
+	value  []string
+	tag    bool
+}
+
+func (r Record) String() string {
+	return fmt.Sprintf("lineno %d, key %s, nums %v, value %v, tag %v", r.lineno, r.key, r.nums, r.value, r.tag)
+}
+
+var count map[int]bool
+var count2 map[int]bool
+
 func main() {
 
 	report := parseBasedOnEachLine()
+	recordStat := make(map[string]*Record, 0)
 
-	//	sum := 0
-	//initColors := make([]string, 0)
-	stats := make(map[string][]string, 0)
-	for _, v := range report {
-		/*
-			if regexp.MustCompile(`^(.*) bags contain.*[1-9] (shiny gold) bag[s]?`).MatchString(v) {
-				initColors = append(initColors)
-			}
-		*/
+	for i, v := range report {
 		//fmt.Printf("[%d]: %s\n", i, v)
 		q := regexp.MustCompile(`([0-9]|bags|bag|,)`).Split(v, -1)
+		//var result []string
+		result := make([]string, 0)
+		nums := make([]int, 0)
 		if len(q) > 0 {
 			//fmt.Printf("[%d]: %q\n", i, q)
-			result := make([]string, 0)
+			//idx := 0
 			for j, color := range q {
 				if j == 0 || colorIn(color, []string{"", "contain", ".", "contain no other"}) {
 					continue
 				}
-				result = append(result, color)
+				trimStr := strings.Trim(q[j], " ")
+				result = append(result, trimStr)
 			}
-			//fmt.Println(result)
-			stats[strings.Trim(q[0], " ")] = result
+
+			//var re = regexp.MustCompile(`(?:[a-z\ ]*) bag[s].*(\d{1,}) (?:[a-z\ ]*) bag[s]?(?:\, (\d{1,}) (?:[a-z\ ]*) bag[s])?.`)
+			re := regexp.MustCompile(`\d{1,}`)
+			m := re.FindAllString(v, -1)
+			for _, v := range m {
+				if n, err := strconv.Atoi(v); err == nil {
+					nums = append(nums, n)
+				}
+			}
+
+			recordStat[strings.Trim(q[0], " ")] = &Record{
+				lineno: i,
+				key:    strings.Trim(q[0], " "),
+				tag:    false,
+				nums:   nums,
+				value:  result,
+			}
 		}
-		//}
 	}
 
-	//	fmt.Println(stats)
-	resultBags := bagBelongTo("shiny gold", stats)
-	fmt.Println("sum: ")
+	//fmt.Println(recordStat)
+	/*
+		for k, v := range recordStat {
+			fmt.Println(k, *v)
+	}*/
+	count = make(map[int]bool, 0)
+	part1 := countBags("shiny gold", recordStat)
+	fmt.Println("part1 >", part1)
 
-	for i, r := range resultBags {
-		fmt.Printf("[%d] %s\n", i, r)
-	}
-
-	result := countBags("shiny gold", stats, 0)
-	fmt.Println("result: ", result)
+	count2 = make(map[int]bool, 0)
+	part2 := countBags2("shiny gold", recordStat)
+	fmt.Println("part2 >", part2)
 }
 
 func colorIn(color string, exa []string) bool {
@@ -130,29 +162,44 @@ func colorIn(color string, exa []string) bool {
 	return false
 }
 
-func bagBelongTo(bags string, stats map[string][]string) []string {
-	outerBag := make([]string, 0)
-	for k, v := range stats {
-		if colorIn(bags, v) {
-			outerBag = append(outerBag, k)
+func countLine(color string, r *Record) bool {
+	if _, Ok := count[r.lineno]; !Ok {
+		if colorIn(color, r.value) {
+			count[r.lineno] = true
+			return true
 		}
 	}
-	return outerBag
+	return false
 }
 
-func countBags(bags string, stats map[string][]string, lvl int) int {
+func countBags(bag string, stats map[string]*Record) int {
 	sum := 0
-	pBags := make([]string, 0)
 	for k, v := range stats {
-		if colorIn(bags, v) {
+		if countLine(bag, v) {
 			sum++
-			pBags = append(pBags, k)
+			sum += countBags(k, stats)
 		}
 	}
-	fmt.Println("level >", lvl, "bags >", bags, " pBags >", pBags)
-	lvl++
-	for _, v := range pBags {
-		sum += countBags(v, stats, lvl)
+
+	return sum
+}
+
+func countBags2(bag string, stats map[string]*Record) int {
+	sum := 0
+
+	v := stats[bag]
+	if len(v.nums) == 0 {
+		return 1
+	}
+
+	for j, q := range v.nums {
+		b := countBags2(v.value[j], stats)
+		a := q * b
+		// when the color has more child
+		if b != 1 {
+			sum += q
+		}
+		sum += a
 	}
 
 	return sum
