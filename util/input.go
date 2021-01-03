@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func parseBasedOnEmptyLine() []string {
+func ParseBasedOnEmptyLine() []string {
 	fN := flag.String("file", "input", "File name")
 	flag.Parse()
 
@@ -34,7 +34,7 @@ func parseBasedOnEmptyLine() []string {
 		}
 
 		if atEOF {
-			return len(data), data[0:len(data)], nil
+			return len(data), data, nil
 		}
 		// Request more data
 		return 0, nil, nil
@@ -53,7 +53,7 @@ func parseBasedOnEmptyLine() []string {
 	return report
 }
 
-func parseBasedOnEachLine() []string {
+func ParseBasedOnEachLine() []string {
 	fN := flag.String("file", "input", "File name")
 	flag.Parse()
 
