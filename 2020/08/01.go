@@ -1,49 +1,19 @@
 package main
 
 import (
-	"bufio"
-	"flag"
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 
+	"github.com/fenglyu/adventofcode/util"
 	"github.com/golang-collections/collections/stack"
 )
-
-func parseBasedOnEachLine() []string {
-	fN := flag.String("file", "input", "File name")
-	//fN := flag.String("file", "test_input", "File name")
-
-	flag.Parse()
-
-	file, err := os.Open(*fN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	report := make([]string, 0)
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		//fmt.Println(scanner.Text()) // Println will add back the final '\n'
-		line := scanner.Text()
-		report = append(report, line)
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-	}
-	return report
-}
 
 var steps map[int]bool
 
 func main() {
 
-	report := parseBasedOnEachLine()
-	fmt.Println("len(report) = ", len(report))
+	report := util.ParseBasedOnEachLine()
 
 	trace := stack.New()
 
@@ -76,7 +46,8 @@ func part1(trace *stack.Stack, report []string) {
 			break
 		}
 		if v, Ok := steps[i]; Ok && v {
-			fmt.Printf("line index %d again, acc %d\n", i, acc)
+			//fmt.Printf("line index %d again, acc %d\n", i, acc)
+			fmt.Println("part1 > ", acc)
 			break
 		}
 
@@ -120,7 +91,8 @@ func part2(trace *stack.Stack, report []string) {
 
 		for {
 			if i < 0 || i > len(report)-1 {
-				fmt.Printf("final line %d, acc %d\n", i, acc)
+				//fmt.Printf("final line %d, acc %d\n", i, acc)
+				fmt.Println("part2 > ", acc)
 				goto breakHere
 			}
 
@@ -144,7 +116,7 @@ func part2(trace *stack.Stack, report []string) {
 				if flag {
 					if v, Ok := steps[i]; Ok && v {
 						i = j + 1
-						fmt.Printf("[jmp] %d [%d] next line is %d again, acc %d\n", j, num, i, acc)
+						//fmt.Printf("[jmp] %d [%d] next line is %d again, acc %d\n", j, num, i, acc)
 					}
 					flag = false
 				}
@@ -153,10 +125,9 @@ func part2(trace *stack.Stack, report []string) {
 				j := i
 				i++
 				if flag {
-
 					if v, Ok := steps[i]; Ok && v {
 						i = j + num
-						fmt.Printf("[nop] %d next line is %d again, acc %d\n", j, i, acc)
+						//fmt.Printf("[nop] %d next line is %d again, acc %d\n", j, i, acc)
 					}
 					flag = false
 				}
@@ -164,6 +135,7 @@ func part2(trace *stack.Stack, report []string) {
 		}
 	}
 
+	// important line to jump out from the inside loop
 breakHere:
 	fmt.Println("Done here")
 }

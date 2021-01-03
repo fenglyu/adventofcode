@@ -9,5 +9,7 @@ import (
 func main() {
 
 	report := util.ParseBasedOnEachLine()
-	fmt.Println(report)
+	fmt.Println(len(report))
+
+	
 }
