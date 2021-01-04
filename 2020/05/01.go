@@ -1,38 +1,16 @@
 package main
 
 import (
-	"bufio"
-	"flag"
 	"fmt"
-	"log"
-	"os"
 	"sort"
 
 	_set "github.com/deckarep/golang-set"
+	"github.com/fenglyu/adventofcode/util"
 )
 
 func main() {
 
-	fN := flag.String("file", "input", "File name")
-	flag.Parse()
-
-	file, err := os.Open(*fN)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	report := make([]string, 0)
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		//fmt.Println(scanner.Text()) // Println will add back the final '\n'
-		line := scanner.Text()
-		report = append(report, line)
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
-	}
+	report := util.ParseBasedOnEachLine()
 
 	//	fmt.Println(report)
 	//fmt.Println(decode("FBFBBFFRLR"))
@@ -51,7 +29,7 @@ func main() {
 	}
 	sort.Ints(array)
 
-	fmt.Println("Part 1: "， lar)
+	fmt.Println("Part 1: ", lar)
 
 	scanSet := makeSet(array)
 
@@ -59,7 +37,7 @@ func main() {
 	for i := array[0]; i <= lar; i++ {
 		allSet.Add(i)
 	}
-	
+
 	// solution 1
 	fmt.Println("scanSet: ", len(scanSet.ToSlice()))
 	fmt.Println("Part 2: ", allSet.Difference(scanSet))
