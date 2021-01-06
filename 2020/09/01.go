@@ -36,6 +36,7 @@ func main() {
 	fmt.Println("part1 > ", part1)
 
 	l, r := 0, 0
+	
 	len := 1
 	for i := 0; i < length-1; i++ {
 		j := i + len
