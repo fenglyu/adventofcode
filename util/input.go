@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func ParseBasedOnEmptyLine() []string {
@@ -70,6 +71,29 @@ func ParseBasedOnEachLine() []string {
 		//fmt.Println(scanner.Text()) // Println will add back the final '\n'
 		line := scanner.Text()
 		report = append(report, line)
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
+	return report
+}
+
+func ParseIntobyteArray(fn string) [][]uint8 {
+	fN := strings.Trim(fn, " ")
+	if strings.EqualFold(fN, "") {
+		fN = "input"
+	}
+	file, err := os.Open(fN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	report := [][]uint8{}
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		report = append(report, []byte(line))
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
