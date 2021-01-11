@@ -29,6 +29,38 @@ func (p *position) String() string {
 	return fmt.Sprintf("[x, y] [%d, %d] in direction %c", p.x, p.y, p.direction)
 }
 
+type waypoint struct {
+	x int
+	y int
+}
+
+func (w *waypoint) String() string {
+	return fmt.Sprintf("[x, y] [%d, %d]", w.x, w.y)
+}
+
+func (w *waypoint) move(navi *navi, p *position) *waypoint {
+	switch navi.action {
+	case 'N':
+		w.y = w.y + navi.value
+	case 'S':
+		w.y = w.y - navi.value
+	case 'E':
+		w.x = w.x + navi.value
+	case 'W':
+		w.x = w.x - navi.value
+	case 'F':
+		p.x = p.x + w.x*navi.value
+		p.y = p.y + w.y*navi.value
+	case 'L', 'F':
+
+	}
+}
+
+func (w *waypoint) rotate(navi *navi) {
+	waypts := [][]int{{1, 1}, {1, -1}, {-1, -1}, {-1, 1}}
+
+}
+
 func (p *position) ManhattanDistance() int {
 	return int(math.Abs(float64(p.x))) + int(math.Abs(float64(p.y)))
 }
@@ -95,11 +127,7 @@ func main() {
 		val, _ := strconv.Atoi(string(arr[1:]))
 		navis = append(navis, &navi{action: arr[0], value: val})
 	}
-	/*
-		for i, n := range navis {
-			fmt.Println(i, n)
-		}
-	*/
+
 	initP := &position{x: 0, y: 0, direction: 'E'}
 	for _, n := range navis {
 		initP.move(n)
