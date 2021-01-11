@@ -67,11 +67,6 @@ func main() {
 		}
 	}
 
-	//fmt.Println(recordStat)
-	/*
-		for k, v := range recordStat {
-			fmt.Println(k, *v)
-	}*/
 	count = make(map[int]bool, 0)
 	part1 := countBags("shiny gold", recordStat)
 	fmt.Println("part1 >", part1)
