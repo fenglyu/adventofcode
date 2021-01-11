@@ -58,7 +58,34 @@ func (w *waypoint) move(navi *navi, p *position) *waypoint {
 
 func (w *waypoint) rotate(navi *navi) {
 	waypts := [][]int{{1, 1}, {1, -1}, {-1, -1}, {-1, 1}}
+	var curDir int
+	for i, v := range waypts {
+		x := int(w.x / int(math.Abs(float64(w.x))))
+		y := int(w.y / int(math.Abs(float64(w.y))))
 
+		if x == v[0] && y == v[1] {
+			curDir = i
+			break
+		}
+	}
+
+	for i := 0; i < navi.value/90; i++ {
+		if navi.action == 'R' {
+			if curDir == len(waypts)-1 {
+				curDir = 0
+			} else {
+				curDir++
+			}
+		} else if navi.action == 'L' {
+			if curDir == 0 {
+				curDir = len(waypts) - 1
+			} else {
+				curDir--
+			}
+		}
+	}
+
+	
 }
 
 func (p *position) ManhattanDistance() int {
