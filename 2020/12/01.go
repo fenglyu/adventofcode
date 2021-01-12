@@ -51,9 +51,10 @@ func (w *waypoint) move(navi *navi, p *position) *waypoint {
 	case 'F':
 		p.x = p.x + w.x*navi.value
 		p.y = p.y + w.y*navi.value
-	case 'L', 'F':
-
+	case 'L', 'R':
+		w.rotate(navi)
 	}
+	return w
 }
 
 func (w *waypoint) rotate(navi *navi) {
@@ -83,9 +84,9 @@ func (w *waypoint) rotate(navi *navi) {
 				curDir--
 			}
 		}
-	}
 
-	
+		w.x, w.y = waypts[curDir][0]*int(math.Abs(float64(w.y))), waypts[curDir][1]*int(math.Abs(float64(w.x)))
+	}
 }
 
 func (p *position) ManhattanDistance() int {
@@ -159,6 +160,19 @@ func main() {
 	for _, n := range navis {
 		initP.move(n)
 	}
-
 	fmt.Println("part1: ", initP.ManhattanDistance())
+
+	wps := make([]*navi, 0)
+	for _, v := range report {
+		arr := []byte(v)
+		val, _ := strconv.Atoi(string(arr[1:]))
+		wps = append(wps, &navi{action: arr[0], value: val})
+	}
+	part2InitP := &position{x: 0, y: 0, direction: 'E'}
+	initWP := &waypoint{x: 10, y: 1}
+	for _, n := range wps {
+		initWP.move(n, part2InitP)
+	}
+
+	fmt.Println("part2: ", part2InitP.ManhattanDistance())
 }
