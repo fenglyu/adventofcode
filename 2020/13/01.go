@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 func main() {
 
 	report := util.ParseBasedOnEachLine()
-	//fmt.Println(report)
 	earlistTimeStamp, _ := strconv.Atoi(report[0])
 	buses := make([]int, 0)
 	part2 := make([]int, 0)
@@ -27,15 +27,8 @@ func main() {
 	i, idx := part1(earlistTimeStamp, buses)
 	fmt.Println("part1: ", (i-earlistTimeStamp)*buses[idx])
 
-	fmt.Println("part2: ", part2)
-	//partTwo(part2)
-	test(part2)
-}
-func test(buses []int) {
-	for i := 1; i < 20; i++ {
-		fmt.Printf("> %d ", buses[0]*i)
-	}
-
+	p2 := partTwo(part2)
+	fmt.Println("part2: ", p2)
 }
 
 func part1(start int, buses []int) (int, int) {
@@ -51,38 +44,46 @@ func part1(start int, buses []int) (int, int) {
 	return 0, 0
 }
 
-func partTwo(buses []int) {
-	start := 100000000000000
-	i := start
-	for i < start*2 {
-		if i%buses[0] == 0 {
-			break
+func partTwo(buses []int) *big.Int {
+	mods := make([]int64, 0)
+	remainders := make([]int64, 0)
+	for i, v := range buses {
+		if v == 0 {
+			continue
 		}
-		i++
+		mods = append(mods, int64(v))
+		remainders = append(remainders, int64((v-i)%v))
 	}
-	fmt.Println("i: ", i)
-	start = i
+	res := chineseRemainderTheorem(mods, remainders)
+	return res
+}
 
-	for start < i*2 {
+// Fermat's little theorem
+func modInvBig(a *big.Int, m *big.Int) *big.Int {
+	var limit, mid, z big.Int
+	limit.Exp(a, mid.Sub(m, big.NewInt(2)), nil)
+	var mod big.Int
+	_, n := z.DivMod(&limit, m, &mod)
+	return n
+}
 
-		flag := 1
-
-		for j, v := range buses {
-			if v == 0 {
-				continue
-			}
-			r := 0
-			if (start+j)%v == 0 {
-				r = 1
-			}
-			flag = flag & r
-		}
-
-		if flag == 1 {
-			fmt.Println("start :", start)
-			break
-		}
-		//fmt.Println("flag :", flag, start)
-		start = start + buses[0]
+func chineseRemainderTheorem(mods []int64, remainders []int64) *big.Int {
+	N := big.NewInt(1)
+	for _, v := range mods {
+		N.Mul(N, big.NewInt(v))
 	}
+
+	sum := big.NewInt(0)
+	for i, v := range mods {
+		var m big.Int
+		m.Div(N, big.NewInt(v))
+		r := big.NewInt(remainders[i])
+		r = r.Mul(r, &m)
+		r = r.Mul(r, modInvBig(&m, big.NewInt(v)))
+		sum.Add(sum, r)
+	}
+
+	var res, z big.Int
+	_, n := z.DivMod(sum, N, &res)
+	return n
 }
