@@ -126,9 +126,12 @@ func memAddressDecoder(mask string, idx uint64) []uint64 {
 		var maskOr uint64 = 0
 		j, xarray := len(v)-1, v
 		for i := len(ar) - 1; i >= 0; i-- {
-			if ar[i] == '1' {
+			switch ar[i] {
+			case '1':
 				maskOr += 1 << (len(ar) - 1 - i)
-			} else if ar[i] == 'X' {
+			case '0':
+				break
+			case 'X':
 				switch xarray[j] {
 				case 1:
 					ow = ow | 1<<(len(ar)-1-i)
