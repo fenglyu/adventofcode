@@ -48,10 +48,13 @@ func main() {
 
 	myticket := make([]int, 0)
 	for i, rf := range strings.Split(rawMyTicket, "\n") {
-		if i == 0 {
+		if i == 0 || strings.Contains(rf, ":") {
 			continue
 		}
 		for _, v := range strings.Split(rf, ",") {
+			if strings.EqualFold(v, "") {
+				continue
+			}
 			num, _ := strconv.Atoi(v)
 			myticket = append(myticket, num)
 		}
@@ -60,7 +63,7 @@ func main() {
 	nearbyticket := make([][]int, 0)
 	for i, rf := range strings.Split(rawNearbyTickets, "\n") {
 
-		if i == 0 {
+		if i == 0 || strings.Contains(rf, ":") {
 			continue
 		}
 		nbticket := make([]int, 0)
@@ -71,8 +74,35 @@ func main() {
 		nearbyticket = append(nearbyticket, nbticket)
 	}
 
-	fmt.Println("fieldsDict: ", fieldsDict)
-	fmt.Println("myticket: ", myticket)
-	fmt.Println("nearbyticket: ", nearbyticket)
+	//fmt.Println("fieldsDict: ", fieldsDict)
+	//fmt.Println("myticket: ", myticket)
+	//fmt.Println("nearbyticket: ", nearbyticket)
 
+	errorRate := make([]int, 0)
+	for _, nt := range nearbyticket {
+		for _, val := range nt {
+			if !valid(fieldsDict, val) {
+				errorRate = append(errorRate, val)
+			}
+		}
+	}
+
+	sum := 0
+	for _, v := range errorRate {
+		sum += v
+	}
+
+	fmt.Println("part 1", sum)
+}
+
+func valid(fieldsDict map[string]interface{}, value int) bool {
+	for _, v := range fieldsDict {
+		for _, seg := range v.([]*Seg) {
+			if seg.Valid(value) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
