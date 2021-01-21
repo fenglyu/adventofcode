@@ -63,7 +63,6 @@ func mod(a, b int) int {
 func main() {
 
 	report := util.ParseBasedOnEachLine()
-	//fmt.Println(report)
 	turns := make([]int, 0)
 
 	for _, v := range strings.Split(report[0], ",") {
@@ -105,7 +104,9 @@ func startingGame(turns []int, limit int) []int {
 			cl := freq[spokenNum]
 			cl.add(turn)
 			if turn+1 > length {
+				// prepare the next turn spoken number here
 				pop := cl.next(2)
+				// next spoken number difference of last two turns
 				turns = append(turns, pop[0]-pop[1])
 			}
 		} else {
