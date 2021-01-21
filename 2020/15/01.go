@@ -8,6 +8,9 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
+// The capacity of circleList's array
+var capacity int = 5
+
 type circleList struct {
 	head, tail int
 	data       []int
@@ -110,7 +113,7 @@ func startingGame(turns []int, limit int) []int {
 				turns = append(turns, pop[0]-pop[1])
 			}
 		} else {
-			cl := newCL(5)
+			cl := newCL(capacity)
 			cl.add(turn)
 			freq[spokenNum] = cl
 			if turn+1 > length {
