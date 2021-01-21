@@ -1,34 +1,78 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/fenglyu/adventofcode/util"
 )
 
-type seg struct {
+type Seg struct {
 	min int
 	max int
 }
 
-fucn (s *seg) Valid() bool{
-	
+func (s *Seg) Valid(v int) bool {
+	return s.min <= v && v <= s.max
+}
+
+func newSeg(seg string) *Seg {
+	segs := strings.Split(seg, "-")
+	min, _ := strconv.Atoi(segs[0])
+	max, _ := strconv.Atoi(segs[1])
+	return &Seg{min: min, max: max}
 }
 
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
-	//fmt.Println(len(report))
+	//fmt.Println(report)
+
+	fmt.Println(len(report))
 	rawFields, rawMyTicket, rawNearbyTickets := report[0], report[1], report[2]
 
-	fieldsDict = make(map[string][]int, 0)
+	fieldsDict := make(map[string]interface{}, 0)
 
 	for _, rf := range strings.Split(rawFields, "\n") {
 		eachRf := strings.Split(rf, ": ")
 		field, rawRanges := eachRf[0], eachRf[1]
 
-		eachRg := strings.Split(rawRanges, " or ")
-		make()
+		ranges := strings.Split(rawRanges, " or ")
+		res := make([]*Seg, 0)
+		for _, v := range ranges {
+			res = append(res, newSeg(v))
+		}
+		fieldsDict[field] = res
 	}
+
+	myticket := make([]int, 0)
+	for i, rf := range strings.Split(rawMyTicket, "\n") {
+		if i == 0 {
+			continue
+		}
+		for _, v := range strings.Split(rf, ",") {
+			num, _ := strconv.Atoi(v)
+			myticket = append(myticket, num)
+		}
+	}
+
+	nearbyticket := make([][]int, 0)
+	for i, rf := range strings.Split(rawNearbyTickets, "\n") {
+
+		if i == 0 {
+			continue
+		}
+		nbticket := make([]int, 0)
+		for _, v := range strings.Split(rf, ",") {
+			num, _ := strconv.Atoi(v)
+			nbticket = append(nbticket, num)
+		}
+		nearbyticket = append(nearbyticket, nbticket)
+	}
+
+	fmt.Println("fieldsDict: ", fieldsDict)
+	fmt.Println("myticket: ", myticket)
+	fmt.Println("nearbyticket: ", nearbyticket)
 
 }
