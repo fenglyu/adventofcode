@@ -24,12 +24,15 @@ func newSeg(seg string) *Seg {
 	return &Seg{min: min, max: max}
 }
 
+type Rule struct {
+	segs []*Seg
+}
+
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
 	//fmt.Println(report)
-
-	fmt.Println(len(report))
+	//fmt.Println(len(report))
 	rawFields, rawMyTicket, rawNearbyTickets := report[0], report[1], report[2]
 
 	fieldsDict := make(map[string]interface{}, 0)
@@ -93,6 +96,14 @@ func main() {
 	}
 
 	fmt.Println("part 1", sum)
+
+	stats := make(map[string]int)
+
+	for j := 0; j < len(nearbyticket[0])-1; j++ {
+		for i := 0; i < len(nearbyticket)-1; i++ {
+
+		}
+	}
 }
 
 func valid(fieldsDict map[string]interface{}, value int) bool {
@@ -105,4 +116,17 @@ func valid(fieldsDict map[string]interface{}, value int) bool {
 	}
 
 	return false
+}
+
+func validField(fieldsDict map[string]interface{}, nearbyticket [][]int, col int) bool {
+
+	for k, v := range fieldsDict {
+		for _, seg := range v.([]*Seg) {
+			if seg.Valid(nearbyticket[i][j]) {
+				flag = false
+				break
+			}
+		}
+	}
+
 }
