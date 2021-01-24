@@ -14,7 +14,7 @@ type Seg struct {
 }
 
 func (s *Seg) Valid(v int) bool {
-	return s.min <= v && v <= s.max
+	return s.min <= v || v <= s.max
 }
 
 func newSeg(seg string) *Seg {
@@ -25,14 +25,23 @@ func newSeg(seg string) *Seg {
 }
 
 type Rule struct {
-	segs []*Seg
+	sgs []*Seg
 }
+
+func (r *Rule) Valid(v int) bool {
+	for _, s := range r.sgs {
+		if !s.Valid(v) {
+			return false
+		}
+	}
+	return true
+}
+
+var gstat map[string]int
 
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
-	//fmt.Println(report)
-	//fmt.Println(len(report))
 	rawFields, rawMyTicket, rawNearbyTickets := report[0], report[1], report[2]
 
 	fieldsDict := make(map[string]interface{}, 0)
@@ -46,7 +55,7 @@ func main() {
 		for _, v := range ranges {
 			res = append(res, newSeg(v))
 		}
-		fieldsDict[field] = res
+		fieldsDict[field] = &Rule{sgs: res}
 	}
 
 	myticket := make([]int, 0)
@@ -77,15 +86,15 @@ func main() {
 		nearbyticket = append(nearbyticket, nbticket)
 	}
 
-	//fmt.Println("fieldsDict: ", fieldsDict)
-	//fmt.Println("myticket: ", myticket)
-	//fmt.Println("nearbyticket: ", nearbyticket)
-
 	errorRate := make([]int, 0)
-	for _, nt := range nearbyticket {
+	//errorLine := make([]int, 0)
+	errorLine := make(map[int]bool)
+	for i, nt := range nearbyticket {
 		for _, val := range nt {
 			if !valid(fieldsDict, val) {
 				errorRate = append(errorRate, val)
+				//errorLine = append(errorLine, i)
+				errorLine[i] = true
 			}
 		}
 	}
@@ -94,39 +103,67 @@ func main() {
 	for _, v := range errorRate {
 		sum += v
 	}
-
 	fmt.Println("part 1", sum)
 
-	stats := make(map[string]int)
+	nearbyticket = append(nearbyticket, myticket)
+	//fmt.Println("errorLine> ", errorLine)
+	//stats := make(map[int]string)
+	gstat = make(map[string]int)
 
+	stats := make([]string, len(nearbyticket[0]))
 	for j := 0; j < len(nearbyticket[0])-1; j++ {
+		ar := make([]int, 0)
 		for i := 0; i < len(nearbyticket)-1; i++ {
-
+			if _, ok := errorLine[i]; ok {
+				continue
+			}
+			ar = append(ar, nearbyticket[i][j])
+		}
+		//fmt.Println(j, len(ar))
+		if ok, con := validField(fieldsDict, ar); ok {
+			stats[j] = con
 		}
 	}
+
+	fmt.Println(len(stats))
+	fmt.Println(stats)
+	mul := 1
+	for i, v := range stats {
+		if strings.Contains(v, "departure") {
+			mul *= myticket[i]
+			fmt.Println("i :", i, v)
+		}
+	}
+	fmt.Println(gstat)
+	fmt.Println(myticket)
+	fmt.Println(mul)
 }
 
 func valid(fieldsDict map[string]interface{}, value int) bool {
 	for _, v := range fieldsDict {
-		for _, seg := range v.([]*Seg) {
+		for _, seg := range v.(*Rule).sgs {
 			if seg.Valid(value) {
 				return true
 			}
 		}
 	}
-
 	return false
 }
 
-func validField(fieldsDict map[string]interface{}, nearbyticket [][]int, col int) bool {
-
+func validField(fieldsDict map[string]interface{}, col []int) (bool, string) {
 	for k, v := range fieldsDict {
-		for _, seg := range v.([]*Seg) {
-			if seg.Valid(nearbyticket[i][j]) {
+		r := v.(*Rule)
+		flag := true
+		for _, v := range col {
+			if !r.Valid(v) {
 				flag = false
 				break
 			}
 		}
+		if flag {
+			gstat[k]++
+			return flag, k
+		}
 	}
-
+	return false, ""
 }
