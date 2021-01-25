@@ -93,13 +93,12 @@ func main() {
 	}
 
 	errorRate := make([]int, 0)
-	//errorLine := make([]int, 0)
+	// marked for part2
 	errorLine := make(map[int]bool)
 	for i, nt := range nearbyticket {
 		for _, val := range nt {
 			if !valid(fieldsDict, val) {
 				errorRate = append(errorRate, val)
-				//errorLine = append(errorLine, i)
 				errorLine[i] = true
 			}
 		}
@@ -122,7 +121,8 @@ func main() {
 			}
 			ar = append(ar, nearbyticket[i][j])
 		}
-		validField(fieldsDict, ar, j)
+
+		validColFields(fieldsDict, ar, j)
 	}
 	/*
 		for k, v := range gstat {
@@ -177,7 +177,7 @@ func valid(fieldsDict map[string]interface{}, value int) bool {
 	return false
 }
 
-func validField(fieldsDict map[string]interface{}, col []int, colNum int) {
+func validColFields(fieldsDict map[string]interface{}, col []int, colNum int) {
 	for k, val := range fieldsDict {
 		r := val.(*Rule)
 		flag := true
