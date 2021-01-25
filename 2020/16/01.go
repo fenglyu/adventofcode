@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	set "github.com/deckarep/golang-set"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -14,7 +15,7 @@ type Seg struct {
 }
 
 func (s *Seg) Valid(v int) bool {
-	return s.min <= v || v <= s.max
+	return s.min <= v && v <= s.max
 }
 
 func newSeg(seg string) *Seg {
@@ -24,20 +25,25 @@ func newSeg(seg string) *Seg {
 	return &Seg{min: min, max: max}
 }
 
+func (s *Seg) String() string {
+	return fmt.Sprintf("[%d-%d]", s.min, s.max)
+}
+
 type Rule struct {
 	sgs []*Seg
 }
 
 func (r *Rule) Valid(v int) bool {
-	for _, s := range r.sgs {
-		if !s.Valid(v) {
-			return false
-		}
-	}
-	return true
+	s1, s2 := r.sgs[0], r.sgs[1]
+	return s1.Valid(v) || s2.Valid(v)
 }
 
-var gstat map[string]int
+func (r *Rule) String() string {
+	return fmt.Sprintf("%s | %s", r.sgs[0], r.sgs[1])
+}
+
+// the mapping of rules name and its applied fileds count
+var gstat map[string]set.Set
 
 func main() {
 
@@ -106,11 +112,8 @@ func main() {
 	fmt.Println("part 1", sum)
 
 	nearbyticket = append(nearbyticket, myticket)
-	//fmt.Println("errorLine> ", errorLine)
-	//stats := make(map[int]string)
-	gstat = make(map[string]int)
+	gstat = make(map[string]set.Set)
 
-	stats := make([]string, len(nearbyticket[0]))
 	for j := 0; j < len(nearbyticket[0])-1; j++ {
 		ar := make([]int, 0)
 		for i := 0; i < len(nearbyticket)-1; i++ {
@@ -119,24 +122,48 @@ func main() {
 			}
 			ar = append(ar, nearbyticket[i][j])
 		}
-		//fmt.Println(j, len(ar))
-		if ok, con := validField(fieldsDict, ar); ok {
-			stats[j] = con
+		validField(fieldsDict, ar, j)
+	}
+	/*
+		for k, v := range gstat {
+			fmt.Printf("%s -> %v\n", k, v)
+		}
+	*/
+	output := make(map[string]set.Set)
+	for {
+		if len(gstat) < 1 {
+			break
+		}
+
+		var t set.Set
+		for k, v := range gstat {
+			slice := v.ToSlice()
+			if len(slice) == 1 {
+				output[k] = v
+				t = v.Clone()
+				delete(gstat, k)
+			}
+		}
+
+		for key, val := range gstat {
+			temp := val.Difference(t)
+			gstat[key] = temp
+		}
+	}
+	/*
+		for k, v := range output {
+			fmt.Printf("%s -> %v\n", k, v)
+		}
+	*/
+	mul := 1
+	for k, v := range output {
+		if strings.Contains(k, "departure") {
+			i := v.Pop().(int)
+			mul *= myticket[i]
 		}
 	}
 
-	fmt.Println(len(stats))
-	fmt.Println(stats)
-	mul := 1
-	for i, v := range stats {
-		if strings.Contains(v, "departure") {
-			mul *= myticket[i]
-			fmt.Println("i :", i, v)
-		}
-	}
-	fmt.Println(gstat)
-	fmt.Println(myticket)
-	fmt.Println(mul)
+	fmt.Println("part 2", mul)
 }
 
 func valid(fieldsDict map[string]interface{}, value int) bool {
@@ -150,20 +177,28 @@ func valid(fieldsDict map[string]interface{}, value int) bool {
 	return false
 }
 
-func validField(fieldsDict map[string]interface{}, col []int) (bool, string) {
-	for k, v := range fieldsDict {
-		r := v.(*Rule)
+func validField(fieldsDict map[string]interface{}, col []int, colNum int) {
+	for k, val := range fieldsDict {
+		r := val.(*Rule)
 		flag := true
 		for _, v := range col {
 			if !r.Valid(v) {
 				flag = false
+				//break on expression colNum == 18 && v == 138
+				//fmt.Println("colNum: ", colNum, v, " invalid:", k, "rule :", r, idx)
 				break
 			}
 		}
 		if flag {
-			gstat[k]++
-			return flag, k
+			if _, Ok := gstat[k]; Ok {
+				fields := gstat[k]
+				fields.Add(colNum)
+				gstat[k] = fields
+			} else {
+				fields := set.NewSet()
+				fields.Add(colNum)
+				gstat[k] = fields
+			}
 		}
 	}
-	return false, ""
 }
