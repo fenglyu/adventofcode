@@ -8,6 +8,6 @@ import (
 
 func main() {
 
-	report := util.ParseBasedOnEachLine()
+	report := util.ParseIntobyteArray("")
 	fmt.Println(report)
 }
