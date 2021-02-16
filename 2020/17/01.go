@@ -43,7 +43,7 @@ func main() {
 
 	hc := newHypeCube(hypeCube)
 	//fmt.Println((hc.c[0][0]).sqz)
-	fmt.Println("conwayCubes: ", hc.conwayCubes(hypeVec))
+	fmt.Println("part2: ", hc.conwayCubes(hypeVec))
 }
 
 func conwayCubesSolution1(g [][][]uint8, vector [][]int, cycle int) int {
@@ -208,7 +208,6 @@ func (h *hypeCube) expandHypeCube() *hypeCube {
 	s.c[0], s.c[len(s.c)-1] = newLineSquare(w1+2, x1+2, y1+2), newLineSquare(w1+2, x1+2, y1+2)
 	for x := 1; x < len(s.c)-1; x++ {
 		l := make([]*square, w1+2)
-		//copy(l[1:len(l)-1], h.c[x-1])
 		for j := 0; j < len(l); j++ {
 			if j == 0 || j == len(l)-1 {
 				l[j] = newSquare(x1+2, y1+2)
@@ -253,7 +252,6 @@ func (h *hypeCube) rule(vector [][]int, z int, w int, x int, y int, o *hypeCube)
 }
 
 func (h *hypeCube) conwayCubes(vec [][]int) int {
-	//fmt.Println("h: ", (h.c[0][0]).sqz)
 	cycle := 1
 	for cycle <= 6 {
 		g, o := h.expandHypeCube(), h.expandHypeCube()
@@ -270,6 +268,7 @@ func (h *hypeCube) conwayCubes(vec [][]int) int {
 			}
 		}
 		h = o
+		// debug cube
 		//o.printCubes()
 		cycle++
 	}

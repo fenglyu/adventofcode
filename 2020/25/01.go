@@ -97,4 +97,9 @@ func main() {
 	for _, v := range hypeVec {
 		fmt.Println(v)
 	}
+
+	fmt.Printf("aaa %d bbb\n", '+')
+	fmt.Printf("aaa %d bbb\n", '0')
+	fmt.Printf("aaa %d bbb\n", '9'-'0')
+
 }
