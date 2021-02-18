@@ -76,7 +76,7 @@ func main() {
 	fmt.Println("part2: ", adSum)
 }
 
-func byteArray(arr []uint8) []uint8 {
+func trimSpace(arr []uint8) []uint8 {
 	res := make([]uint8, 0)
 	for _, v := range arr {
 		if v == ' ' {
@@ -90,7 +90,7 @@ func byteArray(arr []uint8) []uint8 {
 func evaluate(homework []uint8, cal calculate) int {
 	filo := newStack()
 	var res int
-	pure := byteArray(homework)
+	pure := trimSpace(homework)
 	for _, v := range pure {
 		if v == ' ' {
 			continue
@@ -162,10 +162,7 @@ func calc(s *stack) int {
 
 func advancedCalc(s *stack) int {
 	s.reverse()
-	//s.print()
-
 	for e := s.l.Front(); e != nil; e = e.Next() {
-		//fmt.Printf("e: %c\n", e)
 		if z, ok := e.Value.(uint8); ok {
 			if z == '+' {
 				p, n := e.Prev(), e.Next()
