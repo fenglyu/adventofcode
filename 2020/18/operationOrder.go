@@ -68,6 +68,12 @@ func main() {
 	}
 
 	fmt.Println("part1: ", sum)
+
+	adSum := 0
+	for _, v := range report {
+		adSum += evaluate([]byte(v), advancedCalc)
+	}
+	fmt.Println("part2: ", adSum)
 }
 
 func byteArray(arr []uint8) []uint8 {
@@ -114,7 +120,7 @@ func evaluate(homework []uint8, cal calculate) int {
 }
 
 func calc(s *stack) int {
-	s.print()
+	//s.print()
 	numArr, signArr := make([]int, 0), make([]uint8, 0)
 	for {
 		e := s.pop()
@@ -133,7 +139,7 @@ func calc(s *stack) int {
 			numArr = append(numArr, e.(int))
 		}
 	}
-	if len(numArr) == 0 || len(signArr) == 0 {
+	if len(numArr) == 0 {
 		return 0
 	}
 
@@ -156,12 +162,9 @@ func calc(s *stack) int {
 
 func advancedCalc(s *stack) int {
 	s.reverse()
-	s.print()
-	for {
-		e := s.l.Front()
-		if e == nil {
-			break
-		}
+	//s.print()
+
+	for e := s.l.Front(); e != nil; e = e.Next() {
 		//fmt.Printf("e: %c\n", e)
 		if z, ok := e.Value.(uint8); ok {
 			if z == '+' {
@@ -174,9 +177,7 @@ func advancedCalc(s *stack) int {
 				e = newEl
 			}
 		}
-		e = e.Next()
 	}
-	fmt.Println("list: ", s.l)
 	res := calc(&stack{l: s.l})
 	return res
 }
