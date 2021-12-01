@@ -9,8 +9,6 @@ import (
 
 func main() {
 	report := util.ParseBasedOnEachLine()
-	//fmt.Println(report)
-
 	measurements := make([]int, len(report))
 	count := 0
 	for i := 0; i < len(report); i++ {
@@ -20,7 +18,6 @@ func main() {
 			count++
 		}
 	}
-	//fmt.Println(measurements)
 	fmt.Println("part 1:", count)
 
 	pre, next, incr := 0, 0, 0
@@ -36,5 +33,4 @@ func main() {
 	}
 
 	fmt.Println("part 2:", incr)
-
 }
