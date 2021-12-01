@@ -49,6 +49,7 @@ func concatBytes(res string) []uint8 {
 	return u8a
 }
 
+//func SpreadOut(row uint8, permut [][]uint8) [][]uint8 {
 func SpreadOut(row uint8) [][]uint8 {
 	value, Ok := mapp[row]
 	if !Ok {
@@ -58,10 +59,13 @@ func SpreadOut(row uint8) [][]uint8 {
 	case [][]uint8:
 		fmt.Println(value)
 	case []uint8:
-		fmt.Println(value)
+		res := make([][]uint8, len(value))
+		for _, v := range value {
+			res = append(res, SpreadOut(v))
+		}
+		return res
 	case uint8:
-		fmt.Println(value)
-		return
+		return value
 	}
 	return [][]uint8{}
 }
