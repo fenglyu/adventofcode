@@ -2,52 +2,77 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/fenglyu/adventofcode/util"
-	//"github.com/hashicorp/terraform/dag"
 )
 
-//var mapp map[int]*rule
-var mapp map[string]interface{}
+var mapp map[uint8]interface{}
 
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
 	//fmt.Println(report, len(report))
 
-	mapp = make(map[string]interface{})
+	mapp = make(map[uint8]interface{})
 	for _, v := range strings.Split(report[0], "\n") {
 		r := strings.Split(v, ": ")
-		idx, res := r[0], r[1]
-		if strings.Contains(res, "|") {
-			mapp[idx] = newRule(res)
-		} else if strings.Contains(res, "\"") {
-			mapp[idx] = strings.Trim(res, "\"")
+		idInt32, _ := strconv.Atoi(r[0])
+		idx := uint8(idInt32)
+		if strings.Contains(r[1], "|") {
+			// 93: 57 68 | 12 110
+			r := strings.Split(r[1], " | ")
+			n := [][]uint8{concatBytes(r[0]), concatBytes(r[1])}
+			mapp[idx] = n
+		} else if strings.Contains(r[1], "\"") {
+			// 12: "a"
+			v := []byte(strings.Trim(r[1], "\""))
+			//mapp[idx] = bytes.Trim([]byte(r[1]), "\"")
+			mapp[idx] = uint8(v[0])
 		} else {
-
+			// 0: 8 11
+			mapp[idx] = concatBytes(r[1])
 		}
 	}
 
 	fmt.Println(mapp)
-
 }
 
-type rule struct {
-	a, b []string
+func concatBytes(res string) []uint8 {
+	a := strings.Split(res, " ")
+	u8a := make([]uint8, len(a))
+	for i := 0; i < len(a); i++ {
+		ia, _ := strconv.Atoi(a[i])
+		u8a[i] = uint8(ia)
+	}
+	return u8a
 }
 
-func (r *rule) String() string {
-	return fmt.Sprintf("%v | %v", r.a, r.b)
+func SpreadOut(row uint8) [][]uint8 {
+	value, Ok := mapp[row]
+	if !Ok {
+		return nil
+	}
+	switch value.(type) {
+	case [][]uint8:
+		fmt.Println(value)
+	case []uint8:
+		fmt.Println(value)
+	case uint8:
+		fmt.Println(value)
+		return
+	}
+	return [][]uint8{}
 }
 
-func newRule(res string) *rule {
-	r := strings.Split(res, " | ")
-	a, b := strings.Split(r[0], " "), strings.Split(r[1], " ")
-	return &rule{a: a, b: b}
+func Spread(row uint8) {
+	return
 }
 
-func validate(target []byte, idx int) bool {
-
-	return false
+// Cartesian product
+/*
+func product(){
+	return
 }
+*/
