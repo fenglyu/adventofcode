@@ -43,4 +43,42 @@ func main() {
 
 	// part 2
 
+	// oxygen generator rating
+	ogr := make([]int, len(report))
+	// CO2 scrubber rating
+	cosr := make([]int, len(report))
+
+	for i := range ogr {
+		ogr[i] = -1
+		cosr[i] = -1
+	}
+
+	filter(len(count), arr, ogr, func() {}, 0)
+
+}
+
+type bitCriteria func()
+
+func filter(count int, input []uint16, rate []int, f bitCriteria, offset int) ([]int, int) {
+	ogrV, cosrV := 25, 25
+	for i := 0; i < count; i++ {
+		ogrC, cosrC := 0, 0
+		for j := range input {
+			v := ((1 << (count - 1 - i)) & (input[j])) >> (count - 1 - i)
+			if v == 1 {
+				ogrC++
+				rate[j] = i+1
+			} else {
+				cosrC++
+				rate[j] = -(i+1)
+			}
+		}
+
+		if ogrC >= cosrC {
+			orgV = 
+		}
+
+	}
+	fmt.Println(rate)
+	return nil, offset
 }
