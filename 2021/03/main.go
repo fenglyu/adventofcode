@@ -7,6 +7,8 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
+var arrLen int
+
 func main() {
 	report := util.ParseBasedOnEachLine()
 
@@ -17,6 +19,7 @@ func main() {
 	}
 
 	count := make([]int, len(report[0]))
+
 	for j := range arr {
 		for i := 0; i < len(count); i++ {
 			//v := ((1 << (len(count) - 1 - i)) & (0b111110110111)) >> (len(count) - 1 - i)
@@ -49,36 +52,77 @@ func main() {
 	cosr := make([]int, len(report))
 
 	for i := range ogr {
-		ogr[i] = -1
-		cosr[i] = -1
+		ogr[i] = 0
+		cosr[i] = 0
 	}
 
-	filter(len(count), arr, ogr, func() {}, 0)
+	arrLen = len(report[0])
 
+	m := filter(0, arr, ogr, mostCommon, 0)
+	l := filter(0, arr, cosr, leastCommon, 0)
+
+	part2 := 1
+	for i := range ogr {
+		if ogr[i] == m {
+			//fmt.Println(i, arr[i])
+			part2 *= int(arr[i])
+		}
+		if cosr[i] == l {
+			//fmt.Println(i, arr[i])
+			part2 *= int(arr[i])
+		}
+	}
+
+	fmt.Println("part 2: ", part2)
 }
 
-type bitCriteria func()
+type bitCriteria func(a, b, val int) int
 
-func filter(count int, input []uint16, rate []int, f bitCriteria, offset int) ([]int, int) {
-	ogrV, cosrV := 25, 25
-	for i := 0; i < count; i++ {
-		ogrC, cosrC := 0, 0
-		for j := range input {
-			v := ((1 << (count - 1 - i)) & (input[j])) >> (count - 1 - i)
-			if v == 1 {
-				ogrC++
-				rate[j] = i+1
-			} else {
-				cosrC++
-				rate[j] = -(i+1)
-			}
-		}
-
-		if ogrC >= cosrC {
-			orgV = 
-		}
-
+func mostCommon(ogrC, cosrC int, val int) int {
+	if ogrC >= cosrC {
+		return val
+	} else {
+		return -val
 	}
-	fmt.Println(rate)
-	return nil, offset
+}
+
+func leastCommon(ogrC, cosrC int, val int) int {
+	if ogrC >= cosrC {
+		return -val
+	} else {
+		return val
+	}
+}
+
+func filter(i int, input []uint16, rate []int, f bitCriteria, refer int) int {
+	if i >= arrLen {
+		return refer
+	}
+
+	ogrC, cosrC := 0, 0
+
+	for j := range input {
+		if rate[j] != refer {
+			continue
+		}
+
+		v := ((1 << (arrLen - 1 - i)) & (input[j])) >> (arrLen - 1 - i)
+		if v == 1 {
+			ogrC++
+			rate[j] = i + 1
+		} else {
+			cosrC++
+			rate[j] = -(i + 1)
+		}
+	}
+
+	ref := f(ogrC, cosrC, i+1)
+
+	if ogrC == 1 && cosrC == 0 {
+		return i + 1
+	} else if ogrC == 0 && cosrC == 1 {
+		return -(i + 1)
+	}
+
+	return filter(i+1, input, rate, f, ref)
 }
