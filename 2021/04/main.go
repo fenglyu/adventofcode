@@ -15,8 +15,6 @@ var RowColSeq [][]int
 func main() {
 	report := util.ParseBasedOnEmptyLine()
 
-	//fmt.Println(report[0], report[1], report[2], report[3])
-
 	maxI := 0
 	numbers := make([]int, 0)
 	for _, v := range strings.Split(report[0], ",") {
@@ -46,7 +44,6 @@ func main() {
 		return arr[idx]
 	}
 
-	//min := func(arr []int) (int, int) {
 	min := func(arr []int) int {
 		idx := 0
 		for i := range arr {
@@ -69,20 +66,31 @@ func main() {
 
 	hist := make([][][]int, len(report[1:]))
 	m, idx := 50, 50
+	maxm, midx := 0, 0
 	for i, board := range report[1:] {
 		b := generateBoard(board)
 		seqB := convertBoard(Cmap, b)
 		hist[i] = seqB
 		val := boardEaliest(max, min, seqB)
+
 		if val < m {
 			idx = i
 			m = val
 		}
+
+		if val > maxm {
+			midx = i
+			maxm = val
+		}
 	}
 
 	s := sumRestElem(hist[idx], m, numbers)
-	//fmt.Println(idx, "board ", numbers[m], numbers[m+1:], s)
+	////fmt.Println(idx, "board ", numbers[m], numbers[m+1:], s)
 	fmt.Println("part 1 :", numbers[m]*s)
+
+	ed := sumRestElem(hist[midx], maxm, numbers)
+	//fmt.Println(midx, "board ", numbers[maxm], numbers[maxm+1:], ed)
+	fmt.Println("part 2 :", numbers[maxm]*ed)
 
 }
 
@@ -102,11 +110,24 @@ func sumRestElem(b [][]int, idx int, nums []int) int {
 type mm func([]int) int
 
 func boardEaliest(max mm, min mm, b [][]int) int {
-	//max := func(arr []int) (int, int) {
+	// return ith column value list
+	col := func(board [][]int, c int) []int {
+		r := make([]int, len(board))
+		for i := range r {
+			r[i] = board[i][c]
+		}
+		return r
+	}
 
-	smallest := make([]int, len(b))
-	for i := 0; i < len(b); i++ {
+	smallest := make([]int, len(b)*2)
+	i := 0
+	for i < len(b) {
 		smallest[i] = max(b[i])
+		i++
+	}
+	for i < len(b[0])*2 {
+		smallest[i] = max(col(b, i-len(b)))
+		i++
 	}
 	v := min(smallest)
 
