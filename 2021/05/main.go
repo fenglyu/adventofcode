@@ -45,9 +45,6 @@ func (c *segment) isHOrV() bool {
 
 // the lines in your list will only ever be horizontal, vertical, or a diagonal line at exactly 45 degrees
 func (c *segment) isDiagonal() bool {
-	//if c.isHOrV() {
-	//	return true
-	//}
 	// 45 degress
 	k := float64(c.t.y-c.f.y) / float64(c.t.x-c.f.x)
 	if IsEqual(k, 1.0) || IsEqual(k, -1.0) {
@@ -156,14 +153,7 @@ func main() {
 
 	//fmt.Println("h, v", hSize, vSize)
 
-	diagram := make([][]int, hSize+1)
-	for i := range diagram {
-		row := make([]int, vSize+1)
-		for j := range row {
-			row[j] = 0
-		}
-		diagram[i] = row
-	}
+	diagram := matrix(hSize, vSize)
 
 	for _, v := range segs {
 		v.coverPoints(diagram)
@@ -172,15 +162,7 @@ func main() {
 	part1 := overlap(diagram, 2)
 	fmt.Println("part 1: ", part1)
 
-	diagram2 := make([][]int, hSize+1)
-	for i := range diagram2 {
-		row := make([]int, vSize+1)
-		for j := range row {
-			row[j] = 0
-		}
-		diagram2[i] = row
-	}
-
+	diagram2 := matrix(hSize, vSize)
 	for _, v := range segs {
 		//	fmt.Println(v)
 		v.coverPointsPart2(diagram2)
@@ -202,4 +184,17 @@ func overlap(diag [][]int, least int) int {
 	}
 
 	return sum
+}
+
+func matrix(hSize, vSize int) [][]int {
+
+	diagram := make([][]int, hSize+1)
+	for i := range diagram {
+		row := make([]int, vSize+1)
+		for j := range row {
+			row[j] = 0
+		}
+		diagram[i] = row
+	}
+	return diagram
 }
