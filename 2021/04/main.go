@@ -54,16 +54,6 @@ func main() {
 		return arr[idx]
 	}
 
-	/*
-		sum := func(arr []int) int {
-			s := 0
-			for _, v := range arr {
-				s += v
-			}
-			return s
-		}
-	*/
-
 	hist := make([][][]int, len(report[1:]))
 	m, idx := 50, 50
 	maxm, midx := 0, 0
@@ -121,10 +111,12 @@ func boardEaliest(max mm, min mm, b [][]int) int {
 
 	smallest := make([]int, len(b)*2)
 	i := 0
+	// all rows
 	for i < len(b) {
 		smallest[i] = max(b[i])
 		i++
 	}
+	// all columns
 	for i < len(b[0])*2 {
 		smallest[i] = max(col(b, i-len(b)))
 		i++
@@ -149,7 +141,7 @@ func generateBoard(bs string) [][]int {
 		b = append(b, br)
 	}
 
-	//printM(b)
+	//util.PrintMatrix(b)
 	return b
 }
 
@@ -164,16 +156,6 @@ func convertBoard(m []int, b [][]int) [][]int {
 		seqB[i] = r
 	}
 
-	//printM(seqB)
+	//util.PrintMatrix(seqB)
 	return seqB
-}
-
-func printM(b [][]int) {
-	fmt.Println("------->")
-	for i := 0; i < len(b); i++ {
-		for j := 0; j < len(b[0]); j++ {
-			fmt.Printf("%d ", b[i][j])
-		}
-		fmt.Println("")
-	}
 }
