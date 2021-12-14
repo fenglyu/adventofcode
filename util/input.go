@@ -100,3 +100,13 @@ func ParseIntobyteArray(fn string) [][]uint8 {
 	}
 	return report
 }
+
+func PrintMatrix(b [][]int) {
+	fmt.Println("------->")
+	for i := 0; i < len(b); i++ {
+		for j := 0; j < len(b[0]); j++ {
+			fmt.Printf("%d ", b[i][j])
+		}
+		fmt.Println("")
+	}
+}
