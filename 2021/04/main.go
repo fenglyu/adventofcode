@@ -83,6 +83,7 @@ func main() {
 	s := sumRestElem(hist[idx], m, numbers)
 	//fmt.Println(idx, "board ", numbers[m], numbers[m+1:], s)
 	fmt.Println("part 1 :", numbers[m]*s)
+
 }
 
 // choose the winner board, start count from index based on numbers list
@@ -141,6 +142,7 @@ func convertBoard(m []int, b [][]int) [][]int {
 		}
 		seqB[i] = r
 	}
+
 	//printM(seqB)
 	return seqB
 }
