@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -27,10 +28,13 @@ func main() {
 	}
 
 	Cmap := make([]int, maxI+1)
+	for i := range Cmap {
+		Cmap[i] = -1
+	}
+
 	for i, v := range numbers {
 		Cmap[v] = i
 	}
-	//	fmt.Println(numbers)
 
 	max := func(arr []int) int {
 		idx := 0
@@ -53,16 +57,18 @@ func main() {
 		return arr[idx]
 	}
 
-	sum := func(arr []int) int {
-		s := 0
-		for _, v := range arr {
-			s += v
+	/*
+		sum := func(arr []int) int {
+			s := 0
+			for _, v := range arr {
+				s += v
+			}
+			return s
 		}
-		return s
-	}
+	*/
 
 	hist := make([][][]int, len(report[1:]))
-	m, idx := 0, 0
+	m, idx := 50, 50
 	for i, board := range report[1:] {
 		b := generateBoard(board)
 		seqB := convertBoard(Cmap, b)
@@ -74,10 +80,22 @@ func main() {
 		}
 	}
 
-	part1 := Cmap[idx] * sum(numbers[idx+1:])
+	s := sumRestElem(hist[idx], m, numbers)
+	//fmt.Println(idx, "board ", numbers[m], numbers[m+1:], s)
+	fmt.Println("part 1 :", numbers[m]*s)
+}
 
-	fmt.Println(Cmap[idx], numbers[Cmap[idx]+1:])
-	fmt.Println("part 1 :", part1)
+// choose the winner board, start count from index based on numbers list
+func sumRestElem(b [][]int, idx int, nums []int) int {
+	sum := 0
+	for i := 0; i < len(b); i++ {
+		for j := 0; j < len(b[0]); j++ {
+			if b[i][j] > idx {
+				sum += nums[b[i][j]]
+			}
+		}
+	}
+	return sum
 }
 
 type mm func([]int) int
@@ -97,16 +115,19 @@ func boardEaliest(max mm, min mm, b [][]int) int {
 func generateBoard(bs string) [][]int {
 	b := make([][]int, 0)
 
-	rows := strings.Split(bs, "\n")
+	r := regexp.MustCompile("[^\\s]+")
+	rows := strings.Split(strings.TrimSpace(bs), "\n")
 	for _, row := range rows {
-		r := strings.Split(row, " ")
-		br := make([]int, len(r))
-		for j := range r {
-			v, _ := strconv.Atoi(r[j])
+		ro := r.FindAllString(strings.TrimSpace(row), -1)
+		br := make([]int, len(ro))
+		for j := range ro {
+			v, _ := strconv.Atoi(ro[j])
 			br[j] = v
 		}
 		b = append(b, br)
 	}
+
+	//printM(b)
 	return b
 }
 
@@ -120,5 +141,16 @@ func convertBoard(m []int, b [][]int) [][]int {
 		}
 		seqB[i] = r
 	}
+	//printM(seqB)
 	return seqB
+}
+
+func printM(b [][]int) {
+	fmt.Println("------->")
+	for i := 0; i < len(b); i++ {
+		for j := 0; j < len(b[0]); j++ {
+			fmt.Printf("%d ", b[i][j])
+		}
+		fmt.Println("")
+	}
 }
