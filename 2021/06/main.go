@@ -12,7 +12,6 @@ import (
 func main() {
 	report := util.ParseBasedOnEachLine()
 	l := strings.Split(report[0], ",")
-	//fmt.Println(l)
 	fishList := make([]int, len(l))
 	for i := range fishList {
 		v, _ := strconv.Atoi(l[i])
@@ -29,9 +28,8 @@ func main() {
 		fish[v]++
 	}
 
-	part2(fish, 0, 256)
+	part2(fish, 1, 256)
 	sum := 0
-	fmt.Println(fish)
 	for _, v := range fish {
 		sum += v
 	}
@@ -64,7 +62,6 @@ func lanternfish(state []int, len int, day int, limit int) []int {
 func part2(smap map[int]int, day int, limit int) {
 
 	for day <= limit {
-		fmt.Println("day: ", day)
 		length := len(smap)
 		count := 0
 		seq := make([]int, length)
@@ -75,14 +72,17 @@ func part2(smap map[int]int, day int, limit int) {
 		}
 		sort.Ints(seq)
 
+		// cond 2 day == 4
 		for i, v := range seq {
 			if v == 0 {
-				smap[9] = smap[0]
-				smap[8]++
-				delete(smap, 0)
-				count++
+				smap[10] = smap[0]
+				count += smap[0]
 			} else {
 				smap[v-1] = smap[v]
+			}
+
+			if _, Ok := smap[v+1]; !Ok {
+				delete(smap, v)
 			}
 
 			if i == len(seq)-1 {
@@ -90,17 +90,14 @@ func part2(smap map[int]int, day int, limit int) {
 			}
 		}
 
-		if count > 0 {
-			smap[8] += count
+		// new fish, and renew
+		if v, Ok := smap[10]; Ok && v > 0 {
+			smap[6] = smap[6] + smap[10]
+			smap[8] += smap[10]
 		}
 
-		if len(smap) >= 7 {
-			smap[6] = smap[6] + smap[9]
-		}
+		delete(smap, 10)
 
-		delete(smap, 9)
-
-		fmt.Println("smap: ", smap)
 		day++
 	}
 }
