@@ -87,9 +87,7 @@ func parse_signals(input, ouput []string) int {
 
 	mark[0] = setFromPos(seq, []int{0, 1, 2, 4, 5, 6})
 	mark[2] = setFromPos(seq, []int{0, 2, 3, 4, 6})
-	//mark[3] = setFromPos(seq, []int{0, 2, 3, 5, 6})
 	mark[5] = setFromPos(seq, []int{0, 1, 3, 5, 6})
-	//mark[6] = setFromPos(seq, []int{0, 1, 3, 4, 5, 6})
 	mark[9] = setFromPos(seq, []int{0, 1, 2, 3, 5, 6})
 
 	val := 0
@@ -108,7 +106,6 @@ func parse_signals(input, ouput []string) int {
 
 func setFromSlice(arr []byte) set.Set {
 	s := set.NewSet()
-
 	for _, v := range arr {
 		s.Add(v)
 	}
