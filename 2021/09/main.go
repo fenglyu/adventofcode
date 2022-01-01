@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
-	set "github.com/deckarep/golang-set"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -56,28 +56,53 @@ func main() {
 
 	//fmt.Println(tracker)
 
-	seq := make([]set.Set, 0)
+	res := make([]int, 0)
+	for i := 0; i < len(matrix); i++ {
+		for j := 0; j < len(matrix[0]); j++ {
+			c := basin(i, j)
+			res = append(res, c)
+		}
+	}
+
+	sort.Ints(res)
+
+	mul := func(arr []int) int {
+		sum := 1
+		for i := range arr {
+			sum *= arr[i]
+		}
+		return sum
+	}
+	fmt.Println("part2 :", mul(res[len(res)-3:]))
 }
 
-func basin(i, j int) (set.Set, int) {
+func basin(i, j int) int {
 
-	count := 0
+	//fmt.Println("basin : ", i, j)
+	if matrix[i][j] >= '9' {
+		return 0
+	}
+	if tracker[i][j] == FLAG {
+		return 0
+	}
+
+	tracker[i][j] = FLAG
+	count := 1
+
 	direction := [][]int{{0, -1}, {0, 1}, {-1, 0}, {1, 0}}
-	s := set.NewSet()
+	//	s := set.NewSet()
 	for _, v := range direction {
-
 		// board boundary
 		if v[0]+i < 0 || v[1]+j < 0 || v[0]+i >= len(matrix) || v[1]+j >= len(matrix[0]) {
 			continue
 		}
 
-		// Locations of height 9
-		if matrix[i][j] == '9' {
-			return
+		if tracker[v[0]+i][v[1]+j] != FLAG && matrix[v[0]+i][v[1]+j] < '9' {
+			count += basin(v[0]+i, v[1]+j)
 		}
-		s, count = s.Add([]int{i, j}), count+1
 	}
 
+	return count
 }
 
 func lowest(i, j int) {
