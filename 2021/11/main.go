@@ -20,6 +20,28 @@ func main() {
 	}
 
 	fmt.Println("part 1 :", flash)
+
+	report = util.ParseIntobyteArray("")
+	for i := 0; ; i++ {
+		Step(report)
+		if synchronizing(report) {
+			fmt.Println("part 2: ", i+1)
+			break
+		}
+	}
+}
+
+func synchronizing(grid [][]uint8) bool {
+
+	for i := 0; i < len(grid); i++ {
+		for j := 0; j < len(grid[0]); j++ {
+			if grid[i][j] != '0' {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func Step(grid [][]uint8) int {
