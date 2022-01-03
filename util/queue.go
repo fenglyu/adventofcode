@@ -30,6 +30,14 @@ func (f *LIFO) Dequeue() interface{} {
 	return f.Remove(e)
 }
 
+func (f *LIFO) Reverse() *LIFO {
+	r := NewLIFO()
+	for e := f.Front(); e != nil; e = e.Next() {
+		r.PushFront(e.Value)
+	}
+	return r
+}
+
 type FIFO struct {
 	list.List
 }
@@ -44,11 +52,18 @@ func (f *FIFO) Enqueue(x interface{}) *list.Element {
 	return f.PushBack(x)
 }
 
-func DisPlay(l *FIFO) {
-	fmt.Println("l: ", l)
+func DisPlayFIFO(l *FIFO) {
 	for e := l.Front(); e != nil; e = e.Next() {
-		fmt.Println(e.Value)
+		fmt.Printf("%c ", e.Value)
 	}
+	fmt.Println("")
+}
+
+func DisPlayLIFO(l *LIFO) {
+	for e := l.Front(); e != nil; e = e.Next() {
+		fmt.Printf("%c ", e.Value)
+	}
+	fmt.Println("")
 }
 
 func (f *FIFO) Dequeue() interface{} {
@@ -57,4 +72,12 @@ func (f *FIFO) Dequeue() interface{} {
 		return f.Remove(e)
 	}
 	return nil
+}
+
+func (f *FIFO) Reverse() *FIFO {
+	r := NewFIFO()
+	for e := f.Front(); e != nil; e = e.Next() {
+		r.PushFront(e.Value)
+	}
+	return r
 }
