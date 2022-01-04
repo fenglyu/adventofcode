@@ -6,8 +6,8 @@ import (
 )
 
 type Queue interface {
-	Enqueue(x interface{})
-	Dequeue() interface{}
+	Enqueue(x any)
+	Dequeue() any
 	//	Len() int
 }
 
@@ -21,11 +21,11 @@ func NewLIFO() *LIFO {
 	return f
 }
 
-func (f *LIFO) Enqueue(x interface{}) {
+func (f *LIFO) Enqueue(x any) {
 	f.PushFront(x)
 }
 
-func (f *LIFO) Dequeue() interface{} {
+func (f *LIFO) Dequeue() any {
 	e := f.Front()
 	return f.Remove(e)
 }
@@ -48,7 +48,7 @@ func NewFIFO() *FIFO {
 	return f
 }
 
-func (f *FIFO) Enqueue(x interface{}) *list.Element {
+func (f *FIFO) Enqueue(x any) *list.Element {
 	return f.PushBack(x)
 }
 
@@ -66,7 +66,7 @@ func DisPlayLIFO(l *LIFO) {
 	fmt.Println("")
 }
 
-func (f *FIFO) Dequeue() interface{} {
+func (f *FIFO) Dequeue() any {
 	e := f.Front()
 	if e != nil {
 		return f.Remove(e)

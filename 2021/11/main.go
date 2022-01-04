@@ -88,7 +88,7 @@ func task(grid [][]uint8, flash [][]int, i, j int) int {
 		flash[i][j] = 1
 	}
 
-	// either when grid[i][j] == '9' or when grid[i][j] has been flashed already in this step
+	// either when grid[i][j] > '9' or when grid[i][j] has been flashed already in this step
 	if grid[i][j] > '9' || flash[i][j] == 1 {
 		for _, v := range dict {
 			if i+v[0] < 0 || j+v[1] < 0 || i+v[0] > len(grid)-1 || j+v[1] > len(grid[0])-1 {

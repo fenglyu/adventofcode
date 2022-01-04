@@ -8,7 +8,7 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
-var product map[int]interface{}
+var product map[int]any
 
 func main() {
 
@@ -38,7 +38,7 @@ func main() {
 	fmt.Println("Part 1 ", sum)
 
 	//fmt.Println("max count x:", max)
-	product = make(map[int]interface{})
+	product = make(map[int]any)
 
 	for i := 1; i < 10; i++ {
 		a := []int{0, 1}

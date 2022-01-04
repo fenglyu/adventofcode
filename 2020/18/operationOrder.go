@@ -21,11 +21,11 @@ func newStack() *stack {
 	return &stack{l: list.New()}
 }
 
-func (s *stack) push(e interface{}) {
+func (s *stack) push(e any) {
 	s.l.PushBack(e)
 }
 
-func (s *stack) pop() interface{} {
+func (s *stack) pop() any {
 	e := s.l.Back()
 	if e != nil {
 		return s.l.Remove(e)
@@ -179,11 +179,11 @@ func advancedCalc(s *stack) int {
 	return res
 }
 
-func valueSum(a interface{}, b interface{}) int {
+func valueSum(a any, b any) int {
 	return valueToInt(a) + valueToInt(b)
 }
 
-func valueToInt(a interface{}) int {
+func valueToInt(a any) int {
 	var b int
 	switch a.(type) {
 	case uint8:

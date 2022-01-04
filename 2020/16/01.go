@@ -50,7 +50,7 @@ func main() {
 	report := util.ParseBasedOnEmptyLine()
 	rawFields, rawMyTicket, rawNearbyTickets := report[0], report[1], report[2]
 
-	fieldsDict := make(map[string]interface{}, 0)
+	fieldsDict := make(map[string]any, 0)
 
 	for _, rf := range strings.Split(rawFields, "\n") {
 		eachRf := strings.Split(rf, ": ")
@@ -166,7 +166,7 @@ func main() {
 	fmt.Println("part 2", mul)
 }
 
-func valid(fieldsDict map[string]interface{}, value int) bool {
+func valid(fieldsDict map[string]any, value int) bool {
 	for _, v := range fieldsDict {
 		for _, seg := range v.(*Rule).sgs {
 			if seg.Valid(value) {
@@ -177,7 +177,7 @@ func valid(fieldsDict map[string]interface{}, value int) bool {
 	return false
 }
 
-func validColFields(fieldsDict map[string]interface{}, col []int, colNum int) {
+func validColFields(fieldsDict map[string]any, col []int, colNum int) {
 	for k, val := range fieldsDict {
 		r := val.(*Rule)
 		flag := true

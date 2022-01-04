@@ -8,14 +8,14 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
-var mapp map[uint8]interface{}
+var mapp map[uint8]any
 
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
 	//fmt.Println(report, len(report))
 
-	mapp = make(map[uint8]interface{})
+	mapp = make(map[uint8]any)
 	for _, v := range strings.Split(report[0], "\n") {
 		r := strings.Split(v, ": ")
 		idInt32, _ := strconv.Atoi(r[0])
