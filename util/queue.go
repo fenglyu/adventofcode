@@ -8,7 +8,6 @@ import (
 type Queue interface {
 	Enqueue(x any)
 	Dequeue() any
-	//	Len() int
 }
 
 type LIFO struct {
