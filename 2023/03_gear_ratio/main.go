@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -46,7 +48,7 @@ func main() {
 	}
 	fmt.Println("Problem 1:", sum)
 
-	fmt.Println(gearRatio)
+	//fmt.Println(gearRatio)
 
 	reverseMap := make(map[string][]int)
 	for k, v := range gearRatio {
@@ -65,8 +67,17 @@ func main() {
 			ratio += uint64(power)
 		}
 	}
-	fmt.Println("Problem 2:", ratio)
-
+	//fmt.Println("Problem 2:", ratio)
+	var count uint64 = 0
+	for i := 0; i < len(raw); i++ {
+		for j := 0; j < len(raw[i]); j++ {
+			if raw[i][j] == '*' {
+				f, s := getTowNum(i, j)
+				count += uint64(f * s)
+			}
+		}
+	}
+	fmt.Println("Problem 2:", count)
 }
 
 func partNum(i, j int) (bool, int, int, uint8) {
@@ -95,4 +106,46 @@ func partNum(i, j int) (bool, int, int, uint8) {
 	}
 
 	return flag, x, y, c
+}
+
+func getTowNum(i, j int) (int, int) {
+	mySet := mapset.NewSet[int]()
+	direction := [][]int{{-1, 0}, {-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}}
+	for k := 0; k < len(direction); k++ {
+		xset, yset := direction[k][0], direction[k][1]
+		if i+xset < 0 || i+xset >= len(raw[i]) || j+yset < 0 || j+yset >= len(raw) {
+			continue
+		}
+		v := raw[i+xset][j+yset]
+		if v >= '0' && v <= '9' {
+			num := int(v - '0')
+			fmt.Println("num: ", num)
+			l, r := j+xset-1, j+xset+1
+			//c1, c2 := 1, 0
+			c1 := 1
+			for l >= 0 && (raw[i+xset][l] >= '0' && raw[i+xset][l] <= '9') {
+				fmt.Println("left: ", i+xset, l, int(raw[i+xset][l]-'0'))
+				num += int(raw[i+xset][l]-'0') * int(math.Pow10(c1))
+				fmt.Println("num: ", num)
+				l--
+				c1++
+			}
+
+			//c2 := 1
+			for r < len(raw[i+xset]) && (raw[i+xset][r] >= '0' && raw[i+xset][r] <= '9') {
+				num = num*10 + int(raw[i+xset][r]-'0')
+				fmt.Println("right: ", i+xset, r, int(raw[i+xset][r]-'0'))
+				fmt.Println("num: ", num)
+				r++
+			}
+			fmt.Println("num total: ", num)
+			mySet.Add(num)
+
+		}
+	}
+	fmt.Println("MySet: ", mySet.ToSlice())
+	if mySet.Cardinality() == 2 {
+		return mySet.ToSlice()[0], mySet.ToSlice()[1]
+	}
+	return 0, 0
 }
