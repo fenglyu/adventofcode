@@ -48,8 +48,6 @@ func main() {
 	}
 	fmt.Println("Problem 1:", sum)
 
-	//fmt.Println(gearRatio)
-
 	reverseMap := make(map[string][]int)
 	for k, v := range gearRatio {
 		if a, Ok := reverseMap[v]; Ok {
@@ -59,7 +57,6 @@ func main() {
 			reverseMap[v] = []int{k}
 		}
 	}
-	fmt.Println(reverseMap)
 	var ratio uint64 = 0
 	for _, v := range reverseMap {
 		if len(v) == 2 {
@@ -116,36 +113,30 @@ func getTowNum(i, j int) (int, int) {
 		if i+xset < 0 || i+xset >= len(raw[i]) || j+yset < 0 || j+yset >= len(raw) {
 			continue
 		}
-		v := raw[i+xset][j+yset]
+		m, n := i+xset, j+yset
+		v := raw[m][n]
 		if v >= '0' && v <= '9' {
 			num := int(v - '0')
-			fmt.Println("num: ", num)
-			l, r := j+xset-1, j+xset+1
+			l, r := n-1, n+1
 			//c1, c2 := 1, 0
 			c1 := 1
-			for l >= 0 && (raw[i+xset][l] >= '0' && raw[i+xset][l] <= '9') {
-				fmt.Println("left: ", i+xset, l, int(raw[i+xset][l]-'0'))
-				num += int(raw[i+xset][l]-'0') * int(math.Pow10(c1))
-				fmt.Println("num: ", num)
+			for l >= 0 && (raw[m][l] >= '0' && raw[m][l] <= '9') {
+				num += int(raw[m][l]-'0') * int(math.Pow10(c1))
 				l--
 				c1++
 			}
 
 			//c2 := 1
-			for r < len(raw[i+xset]) && (raw[i+xset][r] >= '0' && raw[i+xset][r] <= '9') {
-				num = num*10 + int(raw[i+xset][r]-'0')
-				fmt.Println("right: ", i+xset, r, int(raw[i+xset][r]-'0'))
-				fmt.Println("num: ", num)
+			for r < len(raw[m]) && (raw[m][r] >= '0' && raw[m][r] <= '9') {
+				num = num*10 + int(raw[m][r]-'0')
 				r++
 			}
-			fmt.Println("num total: ", num)
 			mySet.Add(num)
-
 		}
 	}
-	fmt.Println("MySet: ", mySet.ToSlice())
 	if mySet.Cardinality() == 2 {
-		return mySet.ToSlice()[0], mySet.ToSlice()[1]
+		lst := mySet.ToSlice()
+		return lst[0], lst[1]
 	}
 	return 0, 0
 }
