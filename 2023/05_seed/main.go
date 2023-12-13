@@ -83,11 +83,7 @@ func map2Arr(s string) [][]int {
 
 func main() {
 	raw := util.ParseBasedOnEmptyLine()
-	//fmt.Println(len(raw), raw[0])
-
 	seeds := head2Arr(raw[0])
-	//fmt.Println("seeds: ", seeds)
-	//	pwfChains := make([]chainFunc, len(raw)-1)
 	capArr := make([][]conditionActionPair, 0)
 	for _, v := range raw[1:] {
 		categories := strings.Split(v, ":")
@@ -99,18 +95,6 @@ func main() {
 	}
 
 	fmt.Println("problem 1:", lowestLocNum(seeds, capArr))
-
-	//min := math.MaxInt32
-	/*
-		arr := make([]int, 0)
-		for i := 0; i < len(seeds); i += 2 {
-			//sArr := genArr(seeds[i], seeds[i+1])
-			//n := lowestLocNum(sArr, capArr)
-			arr = append(arr, seeds[i])
-		}
-		fmt.Println(arr)
-		fmt.Println("problem 2:", lowestLocNum(arr, capArr))
-	*/
 
 	min := math.MaxInt32
 	var wg sync.WaitGroup
@@ -143,6 +127,7 @@ func main() {
 	/*
 	   problem 2:  79004094
 	   Execution time:  2m28.753255334s
+	   on my Apple M2 Max: 12 core, 96 GB mem
 	*/
 }
 
