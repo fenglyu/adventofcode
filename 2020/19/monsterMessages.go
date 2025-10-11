@@ -50,34 +50,37 @@ func concatBytes(res string) []uint8 {
 	return u8a
 }
 
-func Rec(str []byte, row uint8, idx int) (bool, int) {
+func Rec(str []byte, row uint8, idx int) []int {
 	value, Ok := mapp[row]
 	if !Ok {
-		return false, idx
+		return nil
 	}
-	switch value.(type) {
+
+	switch v := value.(type) {
 	case [][]uint8:
-		rules := value.([][]uint8)
-		r0, _ := Rec(str, rules[0][0], idx)
-		r1, _ := Rec(str, rules[0][1], idx+1)
-		r2, _ := Rec(str, rules[1][0], idx)
-		r3, _ := Rec(str, rules[1][1], idx+1)
-		return (r0 && r1) || (r2 && r3), idx + 2
+		rules := v
+		r0 := Rec(str, rules[0][0], idx)
+		r1 := Rec(str, rules[0][1], idx+1)
+		r2 := Rec(str, rules[1][0], idx)
+		r3 := Rec(str, rules[1][1], idx+1)
+		//return (r0 && r1) || (r2 && r3), idx + 2
+		return []int{}
 	case []uint8:
-		flag := true
-		for _, v := range value.([]uint8) {
-			res, i := Rec(str, v, idx)
-			idx = i
-			if !res {
-				flag = false
-				break
-			}
+		//flag := true
+		var i []int
+		for _, v := range v {
+			i = Rec(str, v, idx)
+			//idx = i
+			//if !res {
+			//	flag = false
+			//	break
+			//}
 		}
-		return flag, idx
+		return i
 	case uint8:
-		return str[idx] == value.(uint8), idx + 1
+		return []int{idx + 1}
 	}
-	return true, idx
+	return []int{idx}
 }
 
 /*
