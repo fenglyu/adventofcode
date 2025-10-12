@@ -56,6 +56,13 @@ type matrix struct {
 	data []mtx
 }
 
+func (ma *matrix) print() {
+	for _, v := range ma.data {
+		fmt.Println("tile: ", v.title)
+		util.PrintMatrix(v.data)
+	}
+}
+
 func newMatric(raw []string) *matrix {
 	if len(raw) == 0 {
 		return nil
@@ -75,10 +82,9 @@ func main() {
 	if len(report) == 0 {
 		return
 	}
-	//fmt.Println(len(report))
-	//fmt.Println(report[0])
 
-	//var int
 	matrix := newMatric(report)
-	fmt.Println(matrix)
+	matrix.print()
+	//fmt.Println(matrix)
+
 }
