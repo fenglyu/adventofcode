@@ -5,21 +5,58 @@ import (
 	"strconv"
 	"strings"
 
+	set "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
 
 //	type key []uint8
 
-type mtx struct {
+type card struct {
 	title int
 	data  [][]uint8
+	edges []int
 }
 
-func (m *mtx) String() string {
+func (m *card) cols(idx int) []uint8 {
+	if idx < 0 || idx >= len(m.data) {
+		return nil
+	}
+
+	res := make([]uint8, len(m.data))
+	for i := 0; i < len(m.data); i++ {
+		res[i] = m.data[i][idx]
+	}
+	return res
+}
+
+func (m *card) val(ar []uint8) int {
+	var cval int = 0
+	for i := 0; i < len(ar); i++ {
+		if ar[i] == '#' {
+			cval = cval<<1 + 1
+		}
+	}
+	return cval
+}
+
+func (m *card) setEdges() [][]uint8 {
+	res := make([][]uint8, 4)
+	res[0], res[2] = m.data[0], m.data[9]
+	res[1], res[3] = m.cols(0), m.cols(9)
+
+	edgeInts := make([]int, 4)
+	for _, v := range res {
+		edgeInts = append(edgeInts, m.val(v))
+	}
+	m.edges = edgeInts
+	return res
+}
+
+func (m *card) String() string {
 	return fmt.Sprintf("Title: %d, %s", m.title, util.Matrix2Str(m.data))
 }
 
-func newMtx(raw string) *mtx {
+func newMtx(raw string) *card {
 	var title int
 	res := strings.Split(raw, ":")
 	if len(res) < 2 {
@@ -46,14 +83,15 @@ func newMtx(raw string) *mtx {
 		data = append(data, []uint8(v))
 	}
 
-	return &mtx{
+	return &card{
 		title: title,
 		data:  data,
 	}
 }
 
 type matrix struct {
-	data []mtx
+	data  []card
+	index map[int]card
 }
 
 func (ma *matrix) print() {
@@ -63,16 +101,37 @@ func (ma *matrix) print() {
 	}
 }
 
+func (ma *matrix) pair() {
+	memo := make(map[int]set.Set[int])
+	for _, card := range ma.data {
+		card.setEdges()
+		for _, e := range card.edges {
+			if v, ok := memo[e]; ok {
+				tileSet := v
+				tileSet.Add(card.title)
+				memo[e] = tileSet
+			} else {
+				tileSet := set.NewSet[int]()
+				tileSet.Add(card.title)
+				memo[e] = tileSet
+			}
+		}
+	}
+
+	fmt.Println(memo)
+}
+
 func newMatric(raw []string) *matrix {
 	if len(raw) == 0 {
 		return nil
 	}
-	res := make([]mtx, len(raw))
-
+	res := make([]card, len(raw))
+	index := make(map[int]card, len(raw))
 	for i, v := range raw {
 		res[i] = *newMtx(v)
+		index[res[i].title] = res[i]
 	}
-	return &matrix{data: res}
+	return &matrix{data: res, index: index}
 }
 
 func main() {
@@ -84,7 +143,8 @@ func main() {
 	}
 
 	matrix := newMatric(report)
-	matrix.print()
+	//matrix.print()
 	//fmt.Println(matrix)
+	matrix.pair()
 
 }
