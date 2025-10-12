@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -13,142 +14,212 @@ type key struct {
 	pos int
 }
 
-var mapp map[uint8]any
-var memo map[key][]int
+type rule interface {
+	match(m *matcher, s []byte, pos int) []int
+}
 
-func concatBytes(res string) []uint8 {
-	a := strings.Split(res, " ")
-	u8a := make([]uint8, len(a))
-	for i := 0; i < len(a); i++ {
-		ia, _ := strconv.Atoi(a[i])
+type matcher struct {
+	rules map[uint8]rule
+	memo  map[key][]int
+}
+
+type literalRule struct {
+	char byte
+}
+
+type sequenceRule struct {
+	subs []uint8
+}
+
+type alternationRule struct {
+	options [][]uint8
+}
+
+func main() {
+	report := util.ParseBasedOnEmptyLine()
+	if len(report) == 0 {
+		return
+	}
+
+	rules := parseRules(strings.TrimSpace(report[0]))
+	m := newMatcher(rules)
+	messages := parseMessages(report)
+
+	part1 := m.countMatches(messages)
+	fmt.Println("part1:", part1)
+
+	m.updateRulesForPart2()
+	part2 := m.countMatches(messages)
+	fmt.Println("part2:", part2)
+}
+
+func newMatcher(rules map[uint8]rule) *matcher {
+	return &matcher{rules: rules, memo: make(map[key][]int)}
+}
+
+func (m *matcher) countMatches(messages []string) int {
+	count := 0
+	for _, msg := range messages {
+		m.memo = make(map[key][]int)
+		ends := m.matchRule(0, []byte(msg), 0)
+		for _, end := range ends {
+			if end == len(msg) {
+				count++
+				break
+			}
+		}
+	}
+	return count
+}
+
+func (m *matcher) matchRule(id uint8, s []byte, pos int) []int {
+	k := key{id: id, pos: pos}
+	if res, ok := m.memo[k]; ok {
+		return res
+	}
+
+	r, ok := m.rules[id]
+	if !ok {
+		return nil
+	}
+
+	out := r.match(m, s, pos)
+	m.memo[k] = out
+	return out
+}
+
+func (m *matcher) updateRulesForPart2() {
+	if _, ok := m.rules[8]; ok {
+		m.rules[8] = alternationRule{options: [][]uint8{{42}, {42, 8}}}
+	}
+	if _, ok := m.rules[11]; ok {
+		m.rules[11] = alternationRule{options: [][]uint8{{42, 31}, {42, 11, 31}}}
+	}
+}
+
+func (r literalRule) match(_ *matcher, s []byte, pos int) []int {
+	if pos < len(s) && s[pos] == r.char {
+		return []int{pos + 1}
+	}
+	return nil
+}
+
+func (r sequenceRule) match(m *matcher, s []byte, pos int) []int {
+	positions := []int{pos}
+	for _, sub := range r.subs {
+		var next []int
+		for _, p := range positions {
+			ends := m.matchRule(sub, s, p)
+			if len(ends) > 0 {
+				next = append(next, ends...)
+			}
+		}
+		if len(next) == 0 {
+			return nil
+		}
+		positions = next
+	}
+	return positions
+}
+
+func (r alternationRule) match(m *matcher, s []byte, pos int) []int {
+	var results []int
+	for _, seq := range r.options {
+		positions := []int{pos}
+		for _, sub := range seq {
+			var next []int
+			for _, p := range positions {
+				ends := m.matchRule(sub, s, p)
+				if len(ends) > 0 {
+					next = append(next, ends...)
+				}
+			}
+			if len(next) == 0 {
+				positions = nil
+				break
+			}
+			positions = next
+		}
+		if len(positions) > 0 {
+			results = append(results, positions...)
+		}
+	}
+	return results
+}
+
+func parseRules(block string) map[uint8]rule {
+	rules := make(map[uint8]rule)
+	if block == "" {
+		return rules
+	}
+	for _, line := range strings.Split(block, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, ": ")
+		if len(parts) != 2 {
+			log.Fatalf("invalid rule line: %q", line)
+		}
+		ruleID, err := strconv.Atoi(parts[0])
+		if err != nil {
+			log.Fatalf("invalid rule id %q: %v", parts[0], err)
+		}
+		body := parts[1]
+		switch {
+		case strings.Contains(body, "\""):
+			value := []byte(strings.Trim(body, "\""))
+			if len(value) != 1 {
+				log.Fatalf("invalid literal rule: %q", line)
+			}
+			rules[uint8(ruleID)] = literalRule{char: value[0]}
+		case strings.Contains(body, "|"):
+			alternatives := strings.Split(body, "|")
+			seqs := make([][]uint8, 0, len(alternatives))
+			for _, alt := range alternatives {
+				seq := parseSequence(strings.TrimSpace(alt))
+				seqs = append(seqs, seq)
+			}
+			rules[uint8(ruleID)] = alternationRule{options: seqs}
+		default:
+			rules[uint8(ruleID)] = sequenceRule{subs: parseSequence(body)}
+		}
+	}
+	return rules
+}
+
+func parseSequence(res string) []uint8 {
+	if strings.TrimSpace(res) == "" {
+		return nil
+	}
+	fields := strings.Fields(res)
+	u8a := make([]uint8, len(fields))
+	for i, f := range fields {
+		ia, err := strconv.Atoi(f)
+		if err != nil {
+			log.Fatalf("invalid rule reference %q: %v", f, err)
+		}
 		u8a[i] = uint8(ia)
 	}
 	return u8a
 }
 
-func main() {
-
-	report := util.ParseBasedOnEmptyLine()
-	//fmt.Println(report, len(report))
-
-	mapp = make(map[uint8]any)
-	for _, v := range strings.Split(report[0], "\n") {
-		r := strings.Split(v, ": ")
-		idInt32, _ := strconv.Atoi(r[0])
-		pos := uint8(idInt32)
-		if strings.Contains(r[1], "|") {
-			// 93: 57 68 | 12 110
-			r := strings.Split(r[1], " | ")
-			n := [][]uint8{concatBytes(r[0]), concatBytes(r[1])}
-			mapp[pos] = n
-		} else if strings.Contains(r[1], "\"") {
-			// 12: "a"
-			v := []byte(strings.Trim(r[1], "\""))
-			//mapp[pos] = bytes.Trim([]byte(r[1]), "\"")
-			mapp[pos] = uint8(v[0])
-		} else {
-			// 0: 8 11
-			mapp[pos] = concatBytes(r[1])
-		}
-	}
-
-	fmt.Println(mapp)
-	fmt.Println(matchRule([]byte("ababbb"), 0, 0))
-}
-
-func matchRule(str []byte, row uint8, pos int) []int {
-	k := key{id: row, pos: pos}
-	if res, Ok := memo[k]; Ok {
-		return res
-	}
-
-	value, Ok := mapp[row]
-	if !Ok {
+func parseMessages(report []string) []string {
+	if len(report) < 2 {
 		return nil
 	}
-
-	var out []int
-	switch v := value.(type) {
-	case [][]uint8:
-		var results []int
-		for _, seq := range v {
-			// run the same sequence logic as above
-			positions := []int{pos}
-			for _, sub := range seq {
-				var next []int
-				for _, p := range positions {
-					ends := matchRule(str, sub, p)
-					if len(ends) > 0 {
-						next = append(next, ends...)
-					}
-				}
-				positions = next
-				if len(positions) == 0 {
-					break
-				}
-			}
-			results = append(results, positions...)
-		}
-		out = results
-	case []uint8:
-		positions := []int{pos}
-		for _, sub := range v {
-			var next []int
-			for _, p := range positions {
-				ends := matchRule(str, sub, p)
-				if len(ends) > 0 {
-					next = append(next, ends...)
-				}
-			}
-			positions = next
-			if len(positions) == 0 {
-				break
-			}
-		}
-		out = positions
-	case uint8:
-		if pos < len(str) && str[pos] == byte(v) {
-			out = []int{pos + 1}
-		} else {
-			out = nil
-		}
-
-	default:
-		out = nil
-	}
-	memo[k] = out
-	return out
-}
-
-/*
-// func SpreadOut(row uint8, permut [][]uint8) [][]uint8 {
-func SpreadOut(row uint8) [][]uint8 {
-	value, Ok := mapp[row]
-	if !Ok {
+	block := strings.TrimSpace(report[1])
+	if block == "" {
 		return nil
 	}
-	switch value.(type) {
-	case [][]uint8:
-		fmt.Println(value)
-	case []uint8:
-		res := make([][]uint8, len(value))
-		for _, v := range value {
-			res = append(res, SpreadOut(v))
+	lines := strings.Split(block, "\n")
+	msgs := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
 		}
-		return res
-	case uint8:
-		return value
+		msgs = append(msgs, line)
 	}
-	return [][]uint8{}
+	return msgs
 }
-
-func Spread(row uint8) {
-	return
-}
-
-// Cartesian product
-/*
-func product(){
-	return
-}
-*/

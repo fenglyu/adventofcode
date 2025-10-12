@@ -1,34 +1,44 @@
 package main
 
-import (
-	"fmt"
-	"strconv"
-	"strings"
-	"testing"
-)
+import "testing"
 
-func TestConcatBytes(t *testing.T) {
-	res := "57 68 | 12 110"
-	r := strings.Split(res, " | ")
-	a, b := strings.Split(r[0], " "), strings.Split(r[1], " ")
-	u8a := make([]uint8, 0)
-	u8b := make([]uint8, 0)
-	for i := 0; i < len(a); i++ {
-		ia, _ := strconv.Atoi(a[i])
-		ib, _ := strconv.Atoi(b[i])
-		u8a = append(u8a, uint8(ia))
-		u8b = append(u8b, uint8(ib))
+func TestSamplePart1(t *testing.T) {
+	input := "0: 4 1 5\n1: 2 3 | 3 2\n2: 4 4 | 5 5\n3: 4 5 | 5 4\n4: \"a\"\n5: \"b\""
+	rules := parseRules(input)
+	m := newMatcher(rules)
+	messages := []string{"ababbb", "bababa", "abbbab", "aaabbb", "aaaabbb"}
+	got := m.countMatches(messages)
+	if got != 2 {
+		t.Fatalf("expected 2 matches, got %d", got)
 	}
-	fmt.Println("u8a", u8a)
-	fmt.Println("u8b", u8b)
-	fmt.Println(a[0], a[1], b[0], b[1])
-	//n := [][]byte{concatBytes(a), concatBytes(b)}
-	//fmt.Printf("%q\n", n)
-	//fmt.Printf("%c, %c, %c,  %q\n", n[0][0], n[0][1], n[0][2], n[1])
 }
 
-/*
-func TestSpreadOut(t *testing.T) {
-
+func TestSamplePart2(t *testing.T) {
+	input := "42: 9 14 | 10 1\n9: 14 27 | 1 26\n10: 23 14 | 28 1\n1: \"a\"\n11: 42 31\n5: 1 14 | 15 1\n19: 14 1 | 14 14\n12: 24 14 | 19 1\n16: 15 1 | 14 14\n31: 14 17 | 1 13\n6: 14 14 | 1 14\n2: 1 24 | 14 4\n0: 8 11\n13: 14 3 | 1 12\n15: 1 | 14\n17: 14 2 | 1 7\n23: 25 1 | 22 14\n28: 16 1\n4: 1 1\n20: 14 14 | 1 15\n3: 5 14 | 16 1\n27: 1 6 | 14 18\n14: \"b\"\n21: 14 1 | 1 14\n25: 1 1 | 1 14\n22: 14 14\n8: 42\n26: 14 22 | 1 20\n18: 15 15\n7: 14 5 | 1 21\n24: 14 1"
+	rules := parseRules(input)
+	m := newMatcher(rules)
+	messages := []string{
+		"abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa",
+		"bbabbbbaabaabba",
+		"babbbbaabbbbbabbbbbbaabaaabaaa",
+		"aaabbbbbbaaaabaababaabababbabaaabbababababaaa",
+		"bbbbbbbaaaabbbbaaabbabaaa",
+		"bbbababbbbaaaaaaaabbababaaababaabab",
+		"ababaaaaaabaaab",
+		"ababaaaaabbbaba",
+		"baabbaaaabbaaaababbaababb",
+		"abbbbabbbbaaaababbbbbbaaaababb",
+		"aaaaabbaabaaaaababaa",
+		"aaaabbaaaabbaaa",
+		"aaaabbaabbaaaaaaabbbabbbaaabbaabaaa",
+		"babaaabbbaaabaababbaabababaaab",
+		"aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba",
+	}
+	if got := m.countMatches(messages); got != 3 {
+		t.Fatalf("expected 3 matches before updates, got %d", got)
+	}
+	m.updateRulesForPart2()
+	if got := m.countMatches(messages); got != 12 {
+		t.Fatalf("expected 12 matches after updates, got %d", got)
+	}
 }
-*/
