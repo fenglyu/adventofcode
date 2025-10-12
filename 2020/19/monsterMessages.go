@@ -61,6 +61,30 @@ func matchRule(str []byte, row uint8, pos int) []int {
 
 	var out []int
 	switch v := value.(type) {
+	case uint8:
+		if pos < len(str) && str[pos] == byte(v) {
+			out = []int{pos + 1}
+		} else {
+			out = nil
+		}
+
+	case []uint8:
+		positions := []int{pos}
+		for _, sub := range v {
+			var next []int
+			for _, p := range positions {
+				ends := matchRule(str, sub, p)
+				if len(ends) > 0 {
+					next = append(next, ends...)
+				}
+			}
+			positions = next
+			if len(positions) == 0 {
+				break
+			}
+		}
+		out = positions
+
 	case [][]uint8:
 		var results []int
 		for _, seq := range v {
@@ -82,32 +106,11 @@ func matchRule(str []byte, row uint8, pos int) []int {
 			results = append(results, positions...)
 		}
 		out = results
-	case []uint8:
-		positions := []int{pos}
-		for _, sub := range v {
-			var next []int
-			for _, p := range positions {
-				ends := matchRule(str, sub, p)
-				if len(ends) > 0 {
-					next = append(next, ends...)
-				}
-			}
-			positions = next
-			if len(positions) == 0 {
-				break
-			}
-		}
-		out = positions
-	case uint8:
-		if pos < len(str) && str[pos] == byte(v) {
-			out = []int{pos + 1}
-		} else {
-			out = nil
-		}
 
 	default:
 		out = nil
 	}
+
 	memo[k] = out
 	return out
 }
