@@ -102,9 +102,13 @@ func (ma *matrix) print() {
 }
 
 func (ma *matrix) pair() {
-	memo := make(map[int]set.Set[int])
-	for _, card := range ma.data {
+	for i, card := range ma.data {
 		card.setEdges()
+		ma.data[i] = card
+	}
+	memo := make(map[int]set.Set[int])
+
+	for _, card := range ma.data {
 		for _, e := range card.edges {
 			if v, ok := memo[e]; ok {
 				tileSet := v
@@ -117,7 +121,6 @@ func (ma *matrix) pair() {
 			}
 		}
 	}
-
 	fmt.Println(memo)
 }
 
