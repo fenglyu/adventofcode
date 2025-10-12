@@ -110,3 +110,19 @@ func PrintMatrix(b [][]int) {
 		fmt.Println("")
 	}
 }
+
+func Matrix2Str(mtx [][]uint8) string {
+	if mtx == nil {
+		return ""
+	}
+
+	var b strings.Builder
+	for i := 0; i < len(mtx); i++ {
+		for j := 0; j < len(mtx[0]); j++ {
+			fmt.Fprintf(&b, "%d ", mtx[i][j])
+		}
+		b.WriteString("")
+	}
+
+	return b.String()
+}
