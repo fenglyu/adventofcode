@@ -8,37 +8,13 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
-var mapp map[uint8]any
-
-func main() {
-
-	report := util.ParseBasedOnEmptyLine()
-	//fmt.Println(report, len(report))
-
-	mapp = make(map[uint8]any)
-	for _, v := range strings.Split(report[0], "\n") {
-		r := strings.Split(v, ": ")
-		idInt32, _ := strconv.Atoi(r[0])
-		idx := uint8(idInt32)
-		if strings.Contains(r[1], "|") {
-			// 93: 57 68 | 12 110
-			r := strings.Split(r[1], " | ")
-			n := [][]uint8{concatBytes(r[0]), concatBytes(r[1])}
-			mapp[idx] = n
-		} else if strings.Contains(r[1], "\"") {
-			// 12: "a"
-			v := []byte(strings.Trim(r[1], "\""))
-			//mapp[idx] = bytes.Trim([]byte(r[1]), "\"")
-			mapp[idx] = uint8(v[0])
-		} else {
-			// 0: 8 11
-			mapp[idx] = concatBytes(r[1])
-		}
-	}
-
-	fmt.Println(mapp)
-	fmt.Println(Rec([]byte("ababbb"), 0, 0))
+type key struct {
+	id  uint8
+	pos int
 }
+
+var mapp map[uint8]any
+var memo map[key][]int
 
 func concatBytes(res string) []uint8 {
 	a := strings.Split(res, " ")
@@ -50,37 +26,98 @@ func concatBytes(res string) []uint8 {
 	return u8a
 }
 
-func Rec(str []byte, row uint8, idx int) []int {
+func main() {
+
+	report := util.ParseBasedOnEmptyLine()
+	//fmt.Println(report, len(report))
+
+	mapp = make(map[uint8]any)
+	for _, v := range strings.Split(report[0], "\n") {
+		r := strings.Split(v, ": ")
+		idInt32, _ := strconv.Atoi(r[0])
+		pos := uint8(idInt32)
+		if strings.Contains(r[1], "|") {
+			// 93: 57 68 | 12 110
+			r := strings.Split(r[1], " | ")
+			n := [][]uint8{concatBytes(r[0]), concatBytes(r[1])}
+			mapp[pos] = n
+		} else if strings.Contains(r[1], "\"") {
+			// 12: "a"
+			v := []byte(strings.Trim(r[1], "\""))
+			//mapp[pos] = bytes.Trim([]byte(r[1]), "\"")
+			mapp[pos] = uint8(v[0])
+		} else {
+			// 0: 8 11
+			mapp[pos] = concatBytes(r[1])
+		}
+	}
+
+	fmt.Println(mapp)
+	fmt.Println(matchRule([]byte("ababbb"), 0, 0))
+}
+
+func matchRule(str []byte, row uint8, pos int) []int {
+	k := key{id: row, pos: pos}
+	if res, Ok := memo[k]; Ok {
+		return res
+	}
+
 	value, Ok := mapp[row]
 	if !Ok {
 		return nil
 	}
 
+	var out []int
 	switch v := value.(type) {
 	case [][]uint8:
-		rules := v
-		r0 := Rec(str, rules[0][0], idx)
-		r1 := Rec(str, rules[0][1], idx+1)
-		r2 := Rec(str, rules[1][0], idx)
-		r3 := Rec(str, rules[1][1], idx+1)
-		//return (r0 && r1) || (r2 && r3), idx + 2
-		return []int{}
-	case []uint8:
-		//flag := true
-		var i []int
-		for _, v := range v {
-			i = Rec(str, v, idx)
-			//idx = i
-			//if !res {
-			//	flag = false
-			//	break
-			//}
+		var results []int
+		for _, seq := range v {
+			// run the same sequence logic as above
+			positions := []int{pos}
+			for _, sub := range seq {
+				var next []int
+				for _, p := range positions {
+					ends := matchRule(str, sub, p)
+					if len(ends) > 0 {
+						next = append(next, ends...)
+					}
+				}
+				positions = next
+				if len(positions) == 0 {
+					break
+				}
+			}
+			results = append(results, positions...)
 		}
-		return i
+		out = results
+	case []uint8:
+		positions := []int{pos}
+		for _, sub := range v {
+			var next []int
+			for _, p := range positions {
+				ends := matchRule(str, sub, p)
+				if len(ends) > 0 {
+					next = append(next, ends...)
+				}
+			}
+			positions = next
+			if len(positions) == 0 {
+				break
+			}
+		}
+		out = positions
 	case uint8:
-		return []int{idx + 1}
+		if pos < len(str) && str[pos] == byte(v) {
+			out = []int{pos + 1}
+		} else {
+			out = nil
+		}
+
+	default:
+		out = nil
 	}
-	return []int{idx}
+	memo[k] = out
+	return out
 }
 
 /*
