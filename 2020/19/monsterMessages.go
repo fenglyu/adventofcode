@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -17,43 +18,34 @@ var mapp map[uint8]any
 var memo map[key][]int
 
 func concatBytes(res string) []uint8 {
-	a := strings.Split(res, " ")
-	u8a := make([]uint8, len(a))
-	for i := 0; i < len(a); i++ {
-		ia, _ := strconv.Atoi(a[i])
+	fields := strings.Fields(res)
+	u8a := make([]uint8, len(fields))
+	for i, f := range fields {
+		ia, err := strconv.Atoi(f)
+		if err != nil {
+			log.Fatalf("invalid rule reference %q: %v", f, err)
+		}
 		u8a[i] = uint8(ia)
 	}
 	return u8a
 }
 
 func main() {
-
 	report := util.ParseBasedOnEmptyLine()
-	//fmt.Println(report, len(report))
-
-	mapp = make(map[uint8]any)
-	for _, v := range strings.Split(report[0], "\n") {
-		r := strings.Split(v, ": ")
-		idInt32, _ := strconv.Atoi(r[0])
-		pos := uint8(idInt32)
-		if strings.Contains(r[1], "|") {
-			// 93: 57 68 | 12 110
-			r := strings.Split(r[1], " | ")
-			n := [][]uint8{concatBytes(r[0]), concatBytes(r[1])}
-			mapp[pos] = n
-		} else if strings.Contains(r[1], "\"") {
-			// 12: "a"
-			v := []byte(strings.Trim(r[1], "\""))
-			//mapp[pos] = bytes.Trim([]byte(r[1]), "\"")
-			mapp[pos] = uint8(v[0])
-		} else {
-			// 0: 8 11
-			mapp[pos] = concatBytes(r[1])
-		}
+	if len(report) == 0 {
+		return
 	}
 
-	fmt.Println(mapp)
-	fmt.Println(matchRule([]byte("ababbb"), 0, 0))
+	mapp = make(map[uint8]any)
+	parseRules(strings.TrimSpace(report[0]))
+	messages := parseMessages(report)
+
+	part1 := countMatches(messages)
+	fmt.Println("part1:", part1)
+
+	updateRulesForPart2()
+	part2 := countMatches(messages)
+	fmt.Println("part2:", part2)
 }
 
 func matchRule(str []byte, row uint8, pos int) []int {
@@ -120,35 +112,85 @@ func matchRule(str []byte, row uint8, pos int) []int {
 	return out
 }
 
-/*
-// func SpreadOut(row uint8, permut [][]uint8) [][]uint8 {
-func SpreadOut(row uint8) [][]uint8 {
-	value, Ok := mapp[row]
-	if !Ok {
+func parseRules(block string) {
+	if block == "" {
+		return
+	}
+	for _, line := range strings.Split(block, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		parts := strings.Split(line, ": ")
+		if len(parts) != 2 {
+			log.Fatalf("invalid rule line: %q", line)
+		}
+		ruleID, err := strconv.Atoi(parts[0])
+		if err != nil {
+			log.Fatalf("invalid rule id %q: %v", parts[0], err)
+		}
+		body := parts[1]
+		switch {
+		case strings.Contains(body, "\""):
+			value := []byte(strings.Trim(body, "\""))
+			if len(value) != 1 {
+				log.Fatalf("invalid literal rule: %q", line)
+			}
+			mapp[uint8(ruleID)] = uint8(value[0])
+		case strings.Contains(body, "|"):
+			alternatives := strings.Split(body, "|")
+			seqs := make([][]uint8, 0, len(alternatives))
+			for _, alt := range alternatives {
+				seq := concatBytes(strings.TrimSpace(alt))
+				seqs = append(seqs, seq)
+			}
+			mapp[uint8(ruleID)] = seqs
+		default:
+			mapp[uint8(ruleID)] = concatBytes(body)
+		}
+	}
+}
+
+func parseMessages(report []string) []string {
+	if len(report) < 2 {
 		return nil
 	}
-	switch value.(type) {
-	case [][]uint8:
-		fmt.Println(value)
-	case []uint8:
-		res := make([][]uint8, len(value))
-		for _, v := range value {
-			res = append(res, SpreadOut(v))
-		}
-		return res
-	case uint8:
-		return value
+	block := strings.TrimSpace(report[1])
+	if block == "" {
+		return nil
 	}
-	return [][]uint8{}
+	lines := strings.Split(block, "\n")
+	msgs := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		msgs = append(msgs, line)
+	}
+	return msgs
 }
 
-func Spread(row uint8) {
-	return
+func countMatches(messages []string) int {
+	count := 0
+	for _, msg := range messages {
+		memo = make(map[key][]int)
+		ends := matchRule([]byte(msg), 0, 0)
+		for _, end := range ends {
+			if end == len(msg) {
+				count++
+				break
+			}
+		}
+	}
+	return count
 }
 
-// Cartesian product
-/*
-func product(){
-	return
+func updateRulesForPart2() {
+	if _, ok := mapp[8]; ok {
+		mapp[8] = [][]uint8{{42}, {42, 8}}
+	}
+	if _, ok := mapp[11]; ok {
+		mapp[11] = [][]uint8{{42, 31}, {42, 11, 31}}
+	}
 }
-*/
