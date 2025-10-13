@@ -30,23 +30,35 @@ func (m *card) cols(idx int) []uint8 {
 }
 
 func (m *card) val(ar []uint8) int {
-	var cval int = 0
+	var cval int
 	for i := 0; i < len(ar); i++ {
+		cval = cval << 1
 		if ar[i] == '#' {
-			cval = cval<<1 + 1
+			cval++
 		}
 	}
 	return cval
 }
 
+func reverse(line []uint8) []uint8 {
+	res := make([]uint8, len(line))
+	copy(res, line)
+	for i, j := 0, len(res)-1; i < j; i, j = i+1, j-1 {
+		res[i], res[j] = res[j], res[i]
+	}
+	return res
+}
+
 func (m *card) setEdges() [][]uint8 {
 	res := make([][]uint8, 4)
-	res[0], res[2] = m.data[0], m.data[9]
-	res[1], res[3] = m.cols(0), m.cols(9)
+	lastIdx := len(m.data) - 1
+	res[0], res[2] = m.data[0], m.data[lastIdx]
+	res[1], res[3] = m.cols(0), m.cols(lastIdx)
 
-	edgeInts := make([]int, 4)
+	edgeInts := make([]int, 0, len(res)*2)
 	for _, v := range res {
 		edgeInts = append(edgeInts, m.val(v))
+		edgeInts = append(edgeInts, m.val(reverse(v)))
 	}
 	m.edges = edgeInts
 	return res
@@ -101,8 +113,9 @@ func (ma *matrix) print() {
 	}
 }
 
-func (ma *matrix) pair() {
-	for i, card := range ma.data {
+func (ma *matrix) pair() map[int]set.Set[int] {
+	for i := range ma.data {
+		card := ma.data[i]
 		card.setEdges()
 		ma.data[i] = card
 	}
@@ -110,18 +123,38 @@ func (ma *matrix) pair() {
 
 	for _, card := range ma.data {
 		for _, e := range card.edges {
-			if v, ok := memo[e]; ok {
-				tileSet := v
-				tileSet.Add(card.title)
-				memo[e] = tileSet
-			} else {
-				tileSet := set.NewSet[int]()
-				tileSet.Add(card.title)
-				memo[e] = tileSet
+			if _, ok := memo[e]; !ok {
+				memo[e] = set.NewSet[int]()
+			}
+			memo[e].Add(card.title)
+		}
+	}
+
+	adjacency := make(map[int]set.Set[int])
+	for _, tiles := range memo {
+		if tiles.Cardinality() < 2 {
+			continue
+		}
+
+		ids := make([]int, 0, tiles.Cardinality())
+		for v := range tiles.Iter() {
+			ids = append(ids, v)
+		}
+
+		for i := range ids {
+			for j := range ids {
+				if i == j {
+					continue
+				}
+				if _, ok := adjacency[ids[i]]; !ok {
+					adjacency[ids[i]] = set.NewSet[int]()
+				}
+				adjacency[ids[i]].Add(ids[j])
 			}
 		}
 	}
-	fmt.Println(memo)
+
+	return adjacency
 }
 
 func newMatric(raw []string) *matrix {
@@ -148,6 +181,7 @@ func main() {
 	matrix := newMatric(report)
 	//matrix.print()
 	//fmt.Println(matrix)
-	matrix.pair()
+	pairs := matrix.pair()
+	fmt.Println(pairs)
 
 }
