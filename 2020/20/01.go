@@ -40,6 +40,9 @@ func (m *card) val(ar []uint8) int {
 	return cval
 }
 
+// reverse returns a copy of the provided edge with its bits flipped left to
+// right. The puzzle allows tiles to be rotated or mirrored, so every edge must
+// be considered in both directions when checking for matches.
 func reverse(line []uint8) []uint8 {
 	res := make([]uint8, len(line))
 	copy(res, line)
@@ -113,6 +116,10 @@ func (ma *matrix) print() {
 	}
 }
 
+// pair builds an adjacency list keyed by tile id. Every tile id maps to the set
+// of other tiles that share at least one matching edge (in either orientation).
+// The adjacency map makes it straightforward for later steps of the solution to
+// reason about how tiles can be stitched together into the final image.
 func (ma *matrix) pair() map[int]set.Set[int] {
 	for i := range ma.data {
 		card := ma.data[i]
