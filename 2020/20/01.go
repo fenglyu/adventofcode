@@ -9,8 +9,6 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
-//	type key []uint8
-
 type card struct {
 	title int
 	data  [][]uint8
@@ -177,6 +175,7 @@ func newMatric(raw []string) *matrix {
 	return &matrix{data: res, index: index}
 }
 
+
 func main() {
 
 	report := util.ParseBasedOnEmptyLine()
@@ -187,8 +186,16 @@ func main() {
 
 	matrix := newMatric(report)
 	//matrix.print()
-	//fmt.Println(matrix)
 	pairs := matrix.pair()
-	fmt.Println(pairs)
+	//fmt.Println(pairs)
 
+	part1 :=1
+	for k, v := range pairs{
+		//fmt.Println(k, v)
+		if v.Cardinality() == 2 {
+			//fmt.Println(k, v)
+			part1 *= k
+		}
+	}
+	fmt.Println("part: ", part1)
 }
