@@ -8,3 +8,5 @@ require (
 )
 
 require github.com/deckarep/golang-set/v2 v2.5.0
+
+require github.com/cespare/xxhash v1.1.0 // indirect

@@ -3,10 +3,10 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
-	set "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -118,9 +118,9 @@ func newMtx(raw string) *card {
 // Adjacency list stores the information as an array of list objects, with one list for each vertex.
 // For each vertex u there is a list of Integer Pair Objects representsing the edge (u, v) of weight w.
 type edge struct {
-	from   int
-	to     int
-	weight int
+	from int
+	to   int
+	// weight int
 }
 
 type vertex struct {
@@ -129,15 +129,19 @@ type vertex struct {
 }
 
 type graph struct {
-	data list.List
+	// Adj []*list.List
+	Adj map[int]*list.List
 	// data  []card
-	index map[int]card
+	index map[int]*card
 }
 
 func (ma *graph) print() {
-	for _, v := range ma.data {
-		fmt.Println("tile: ", v.title)
-		util.PrintMatrix(v.data)
+	for k, v := range ma.Adj {
+		fmt.Printf("key: %d, val: %v\n", k, v)
+		// util.PrintMatrix(v.data)
+		for e := v.Front(); e != nil; e = e.Next() {
+			fmt.Println(e.Value)
+		}
 	}
 }
 
@@ -145,6 +149,7 @@ func (ma *graph) print() {
 // of other tiles that share at least one matching edge (in either orientation).
 // The adjacency map makes it straightforward for later steps of the solution to
 // reason about how tiles can be stitched together into the final image.
+/*
 func (ma *graph) pair() map[int]set.Set[int] {
 	for i := range ma.data {
 		card := ma.data[i]
@@ -189,18 +194,34 @@ func (ma *graph) pair() map[int]set.Set[int] {
 
 	return adjacency
 }
+*/
 
 func newGraph(raw []string) *graph {
 	if len(raw) == 0 {
 		return nil
 	}
-	res := make([]card, len(raw))
-	index := make(map[int]card, len(raw))
-	for i, v := range raw {
-		res[i] = *newMtx(v)
-		index[res[i].title] = res[i]
+	//res := make([]card, len(raw))
+	adj:=make(map[int]*list.List)
+	index := make(map[int]*card, len(raw))
+	for _, v := range raw {
+		card := newMtx(v)
+		/*
+		buf := new(bytes.Buffer)
+		err := binary.Write(buf, binary.LittleEndian, res[i].title)
+		if err != nil {
+			fmt.Println("binary.Write failed:", err)
+		}
+		id := xxhash.Sum64(buf.Bytes())
+		index[id.(int)] = res[i]
+		*/
+		if card == nil{
+			continue
+		}
+		index[card.title] = card
+		adj[card.title] = list.New()
+
 	}
-	return &graph{data: res, index: index}
+	return &graph{Adj: adj, index: index}
 }
 
 func main() {
@@ -211,10 +232,11 @@ func main() {
 	}
 
 	graph := newGraph(report)
-	// graph.print()
-	pairs := graph.pair()
+	graph.print()
+	// pairs := graph.pair()
 	// fmt.Println(pairs)
-
+	os.Exit(0)
+	/*
 	part1 := 1
 	for k, v := range pairs {
 		fmt.Println(k, v)
@@ -223,7 +245,7 @@ func main() {
 			part1 *= k
 		}
 	}
-	/*
+
 	   ➜ go run 01.go
 	   memo:  map[9:Set{1427, 2729} 18:Set{1171, 1489} 24:Set{1171} 43:Set{1489} 66:Set{3079} 78:Set{2971} 85:Set{2971, 2729} 89:Set{2311, 3079} 96:Set{1171} 116:Set{2473, 3079} 161:Set{2971} 177:Set{1951} 183:Set{1427, 1489} 184:
 	   Set{2473, 3079} 210:Set{2311, 1427} 231:Set{2311} 234:Set{1427, 2473} 264:Set{3079} 271:Set{2729} 288:Set{1489, 1171} 300:Set{1427, 2311} 318:Set{2311, 1951} 348:Set{1427, 2473} 391:Set{1171} 397:Set{1951, 2729} 399:Set{117
@@ -238,7 +260,7 @@ func main() {
 	   3079 Set{2473, 2311}
 	   2311 Set{1951, 1427, 3079}
 	   1171 Set{1489, 2473}
-	*/
-	fmt.Println("part1: ", part1)
-}
 
+	fmt.Println("part1: ", part1)
+		*/
+}
