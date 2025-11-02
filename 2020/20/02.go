@@ -205,15 +205,41 @@ func (ma *graph) pair() {
 
 	memo := make(map[int]set.Set[int])
 
-	for k, v := range ma.index {
-		for e := range v.edges {
+	for _, v := range ma.index {
+		// fmt.Println("k: ", k, "v: ", v)
+		for _, e := range v.edges {
 			if _, Ok := memo[e]; !Ok {
 				memo[e] = set.NewSet[int]()
 			}
-			memo[e].Add(k)
+			memo[e].Add(v.title)
 		}
 	}
 	fmt.Println("memo: ", memo)
+
+	for k, v := range memo {
+		if v.Cardinality() < 2 {
+			continue
+		} else if v.Cardinality() == 2 {
+			fmt.Println("[2]", k, v)
+		} else {
+			fmt.Println("[>2]", k, v)
+		}
+	}
+
+	// ma.Adj
+	for _, v := range memo {
+		if v.Cardinality() < 2 {
+			// skip card's edge that has no neighbours
+			continue
+		}
+
+		for _, t := range v.ToSlice() {
+			if _, Ok := ma.Adj[t]; !Ok {
+				:q
+
+			}
+		}
+	}
 }
 
 func newGraph(raw []string) *graph {
