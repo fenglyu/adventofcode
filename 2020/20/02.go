@@ -3,10 +3,10 @@ package main
 import (
 	"container/list"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
+	set "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -196,25 +196,45 @@ func (ma *graph) pair() map[int]set.Set[int] {
 }
 */
 
+func (ma *graph) pair() {
+	for tite, c := range ma.index {
+		card := c
+		card.setEdges()
+		ma.index[tite] = card
+	}
+
+	memo := make(map[int]set.Set[int])
+
+	for k, v := range ma.index {
+		for e := range v.edges {
+			if _, Ok := memo[e]; !Ok {
+				memo[e] = set.NewSet[int]()
+			}
+			memo[e].Add(k)
+		}
+	}
+	fmt.Println("memo: ", memo)
+}
+
 func newGraph(raw []string) *graph {
 	if len(raw) == 0 {
 		return nil
 	}
-	//res := make([]card, len(raw))
-	adj:=make(map[int]*list.List)
+	// res := make([]card, len(raw))
+	adj := make(map[int]*list.List)
 	index := make(map[int]*card, len(raw))
 	for _, v := range raw {
 		card := newMtx(v)
 		/*
-		buf := new(bytes.Buffer)
-		err := binary.Write(buf, binary.LittleEndian, res[i].title)
-		if err != nil {
-			fmt.Println("binary.Write failed:", err)
-		}
-		id := xxhash.Sum64(buf.Bytes())
-		index[id.(int)] = res[i]
+			buf := new(bytes.Buffer)
+			err := binary.Write(buf, binary.LittleEndian, res[i].title)
+			if err != nil {
+				fmt.Println("binary.Write failed:", err)
+			}
+			id := xxhash.Sum64(buf.Bytes())
+			index[id.(int)] = res[i]
 		*/
-		if card == nil{
+		if card == nil {
 			continue
 		}
 		index[card.title] = card
@@ -232,35 +252,34 @@ func main() {
 	}
 
 	graph := newGraph(report)
-	graph.print()
-	// pairs := graph.pair()
-	// fmt.Println(pairs)
-	os.Exit(0)
+	// graph.print()
+	graph.pair()
+	//fmt.Println(pairs)
 	/*
-	part1 := 1
-	for k, v := range pairs {
-		fmt.Println(k, v)
-		if v.Cardinality() == 2 {
-			// fmt.Println(k, v)
-			part1 *= k
+		part1 := 1
+		for k, v := range pairs {
+			fmt.Println(k, v)
+			if v.Cardinality() == 2 {
+				// fmt.Println(k, v)
+				part1 *= k
+			}
 		}
-	}
 
-	   ➜ go run 01.go
-	   memo:  map[9:Set{1427, 2729} 18:Set{1171, 1489} 24:Set{1171} 43:Set{1489} 66:Set{3079} 78:Set{2971} 85:Set{2971, 2729} 89:Set{2311, 3079} 96:Set{1171} 116:Set{2473, 3079} 161:Set{2971} 177:Set{1951} 183:Set{1427, 1489} 184:
-	   Set{2473, 3079} 210:Set{2311, 1427} 231:Set{2311} 234:Set{1427, 2473} 264:Set{3079} 271:Set{2729} 288:Set{1489, 1171} 300:Set{1427, 2311} 318:Set{2311, 1951} 348:Set{1427, 2473} 391:Set{1171} 397:Set{1951, 2729} 399:Set{117
-	   1, 2473} 456:Set{2971} 481:Set{2473} 498:Set{2311, 1951} 501:Set{3079} 532:Set{2971} 542:Set{2473} 564:Set{1951} 565:Set{1489, 2971} 576:Set{1427, 2729} 587:Set{1951} 616:Set{2311, 3079} 680:Set{2971, 2729} 689:Set{2971, 14
-	   89} 702:Set{3079} 710:Set{1951, 2729} 841:Set{1951} 848:Set{1489} 902:Set{1171} 924:Set{2311} 948:Set{1427, 1489} 962:Set{2729} 966:Set{2473, 1171}]
-	   1951 Set{2729, 2311}
-	   2729 Set{1427, 1951, 2971}
-	   1427 Set{1489, 2473, 2311, 2729}
-	   1489 Set{1427, 2971, 1171}
-	   2473 Set{1427, 3079, 1171}
-	   2971 Set{1489, 2729}
-	   3079 Set{2473, 2311}
-	   2311 Set{1951, 1427, 3079}
-	   1171 Set{1489, 2473}
+		   ➜ go run 01.go
+		   memo:  map[9:Set{1427, 2729} 18:Set{1171, 1489} 24:Set{1171} 43:Set{1489} 66:Set{3079} 78:Set{2971} 85:Set{2971, 2729} 89:Set{2311, 3079} 96:Set{1171} 116:Set{2473, 3079} 161:Set{2971} 177:Set{1951} 183:Set{1427, 1489} 184:
+		   Set{2473, 3079} 210:Set{2311, 1427} 231:Set{2311} 234:Set{1427, 2473} 264:Set{3079} 271:Set{2729} 288:Set{1489, 1171} 300:Set{1427, 2311} 318:Set{2311, 1951} 348:Set{1427, 2473} 391:Set{1171} 397:Set{1951, 2729} 399:Set{117
+		   1, 2473} 456:Set{2971} 481:Set{2473} 498:Set{2311, 1951} 501:Set{3079} 532:Set{2971} 542:Set{2473} 564:Set{1951} 565:Set{1489, 2971} 576:Set{1427, 2729} 587:Set{1951} 616:Set{2311, 3079} 680:Set{2971, 2729} 689:Set{2971, 14
+		   89} 702:Set{3079} 710:Set{1951, 2729} 841:Set{1951} 848:Set{1489} 902:Set{1171} 924:Set{2311} 948:Set{1427, 1489} 962:Set{2729} 966:Set{2473, 1171}]
+		   1951 Set{2729, 2311}
+		   2729 Set{1427, 1951, 2971}
+		   1427 Set{1489, 2473, 2311, 2729}
+		   1489 Set{1427, 2971, 1171}
+		   2473 Set{1427, 3079, 1171}
+		   2971 Set{1489, 2729}
+		   3079 Set{2473, 2311}
+		   2311 Set{1951, 1427, 3079}
+		   1171 Set{1489, 2473}
 
-	fmt.Println("part1: ", part1)
-		*/
+		fmt.Println("part1: ", part1)
+	*/
 }
