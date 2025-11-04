@@ -51,6 +51,12 @@ func (m *card) val(ar []uint8) int {
 	return cval
 }
 
+func (m *card) flip() *card {
+	var flipc card
+
+	return &flipc
+}
+
 // reverse returns a copy of the provided edge with its bits flipped left to
 // right. The puzzle allows tiles to be rotated or mirrored, so every edge must
 // be considered in both directions when checking for matches.
@@ -214,17 +220,19 @@ func (ma *graph) pair() {
 			memo[e].Add(v.title)
 		}
 	}
-	fmt.Println("memo: ", memo)
+	// fmt.Println("memo: ", memo)
 
-	for k, v := range memo {
-		if v.Cardinality() < 2 {
-			continue
-		} else if v.Cardinality() == 2 {
-			fmt.Println("[2]", k, v)
-		} else {
-			fmt.Println("[>2]", k, v)
+	/*
+		for k, v := range memo {
+			if v.Cardinality() < 2 {
+				continue
+			} else if v.Cardinality() == 2 {
+				fmt.Println("[2]", k, v)
+			} else {
+				fmt.Println("[>2]", k, v)
+			}
 		}
-	}
+	*/
 
 	// ma.Adj
 	for _, v := range memo {
@@ -233,13 +241,34 @@ func (ma *graph) pair() {
 			continue
 		}
 
-		for _, t := range v.ToSlice() {
-			if _, Ok := ma.Adj[t]; !Ok {
-				:q
+		for _, q := range v.ToSlice() {
+			for _, p := range v.ToSlice() {
+				if q == p {
+					continue
+				}
 
+				if _, Ok := ma.Adj[q]; !Ok {
+					ma.Adj[q] = list.New()
+				}
+
+				if !eleInList(p, ma.Adj[q]) {
+					ma.Adj[q].PushBack(p)
+				}
 			}
 		}
 	}
+}
+
+// eleInList return true if v already exists in given linked list
+func eleInList(v any, l *list.List) bool {
+	for e := l.Front(); e != nil; e = e.Next() {
+		val := v.(int)
+		if val == e.Value.(int) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func newGraph(raw []string) *graph {
@@ -280,6 +309,7 @@ func main() {
 	graph := newGraph(report)
 	// graph.print()
 	graph.pair()
+	graph.print()
 	//fmt.Println(pairs)
 	/*
 		part1 := 1
