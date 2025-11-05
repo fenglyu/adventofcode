@@ -310,32 +310,53 @@ func main() {
 	// graph.print()
 	graph.pair()
 	graph.print()
-	//fmt.Println(pairs)
-	/*
-		part1 := 1
-		for k, v := range pairs {
-			fmt.Println(k, v)
-			if v.Cardinality() == 2 {
-				// fmt.Println(k, v)
-				part1 *= k
-			}
-		}
-
-		   ➜ go run 01.go
-		   memo:  map[9:Set{1427, 2729} 18:Set{1171, 1489} 24:Set{1171} 43:Set{1489} 66:Set{3079} 78:Set{2971} 85:Set{2971, 2729} 89:Set{2311, 3079} 96:Set{1171} 116:Set{2473, 3079} 161:Set{2971} 177:Set{1951} 183:Set{1427, 1489} 184:
-		   Set{2473, 3079} 210:Set{2311, 1427} 231:Set{2311} 234:Set{1427, 2473} 264:Set{3079} 271:Set{2729} 288:Set{1489, 1171} 300:Set{1427, 2311} 318:Set{2311, 1951} 348:Set{1427, 2473} 391:Set{1171} 397:Set{1951, 2729} 399:Set{117
-		   1, 2473} 456:Set{2971} 481:Set{2473} 498:Set{2311, 1951} 501:Set{3079} 532:Set{2971} 542:Set{2473} 564:Set{1951} 565:Set{1489, 2971} 576:Set{1427, 2729} 587:Set{1951} 616:Set{2311, 3079} 680:Set{2971, 2729} 689:Set{2971, 14
-		   89} 702:Set{3079} 710:Set{1951, 2729} 841:Set{1951} 848:Set{1489} 902:Set{1171} 924:Set{2311} 948:Set{1427, 1489} 962:Set{2729} 966:Set{2473, 1171}]
-		   1951 Set{2729, 2311}
-		   2729 Set{1427, 1951, 2971}
-		   1427 Set{1489, 2473, 2311, 2729}
-		   1489 Set{1427, 2971, 1171}
-		   2473 Set{1427, 3079, 1171}
-		   2971 Set{1489, 2729}
-		   3079 Set{2473, 2311}
-		   2311 Set{1951, 1427, 3079}
-		   1171 Set{1489, 2473}
-
-		fmt.Println("part1: ", part1)
-	*/
+	// fmt.Println(pairs)
 }
+
+/*
+Understanding the current state
+pair() in 2020/20/02.go is already turning each tile into a set of matching neighbors by comparing every edge (both orientations) and populating graph.Adj[title] with IDs of tiles that can touch it.
+
+Each card now carries all of its edges, forward and reversed, courtesy of setEdges, so you have the raw data needed to reason about rotations and flips later.
+
+Next steps for assembling the image
+Classify tiles first (corners, edges, interiors).
+With the adjacency map, count how many neighbors every tile has: 2 means “corner”, 3 means “edge”, and 4 means “interior”. That lets you pick a corner tile to anchor the layout and narrows search when you fill borders, because only edge tiles can go there.
+
+Represent board positions explicitly.
+Treat the final picture as an N x N grid of tile IDs. You can compute N = sqrt(len(graph.index)), then run a backtracking search that tries to place tiles row by row. Track which IDs you have already used and consult adjacency sets so you only consider candidates that actually share an edge with already-placed neighbors.
+
+Store oriented edges, not just IDs.
+To know whether a candidate tile fits to the right/below another tile, you need the literal edge strings (or their integer encodings). Build a helper that, given a tile ID and a rotation/flip choice, returns the four oriented edges. You already have the base edges; adding rotation and mirroring helpers on top of card.data is the next milestone.
+
+Backtracking search with pruning.
+For each position (r, c) in the grid:
+
+derive the required top edge (from (r-1, c)) and left edge (from (r, c-1)) if they exist;
+
+iterate neighbors from graph.Adj that are still unused;
+
+for each, iterate the eight orientations (4 rotations × 2 flips) and check whether the oriented edges align.
+Once all constraints match, place the tile and recurse to the next position. Backtrack if you hit a dead end.
+
+Optional: use BFS/DFS only for connectedness, not placement.
+Graph traversal algorithms (BFS/DFS) are good for confirming the graph is a single component, but they can’t on their own assign absolute positions because rotations matter. A constraint-satisfaction/backtracking solver is the usual approach here.
+
+On the adjacency list structure
+map[int]*list.List works, but it forces linear scans (eleInList) to keep entries unique.
+Consider storing map[int]set.Set[int] or simply map[int][]int and rely on Go’s slices plus a seen map during generation. A slice is more idiomatic and simpler, given that neighbor counts are tiny (≤4).
+
+Regardless of container, keep the adjacency lookup O(1) per tile ID, because you will query it constantly during the search.
+
+Putting this together, your pipeline can look like:
+
+Build the adjacency map you already have.
+
+Split tiles into corner/edge/interior buckets.
+
+Drive a recursive backtracking solver that fills an N x N grid, testing all orientations.
+
+Once the grid is filled, strip borders (stripBoarder) and stitch the tile cores together to form the large image, then continue with sea-monster detection.
+
+Following that structure will get you from the neighbor graph to a full puzzle assembly.
+*/
