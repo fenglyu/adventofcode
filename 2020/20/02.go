@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	set "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
@@ -57,6 +58,13 @@ func (m *card) flip() *card {
 	return &flipc
 }
 
+// rotate
+func (m *card) rotate() *card {
+	var flipc card
+
+	return &flipc
+}
+
 // reverse returns a copy of the provided edge with its bits flipped left to
 // right. The puzzle allows tiles to be rotated or mirrored, so every edge must
 // be considered in both directions when checking for matches.
@@ -85,7 +93,7 @@ func (m *card) setEdges() [][]uint8 {
 }
 
 func (m *card) String() string {
-	return fmt.Sprintf("Title: %d, %s", m.title, util.Matrix2Str(m.data))
+	return fmt.Sprintf("Title: %d, data: %s, edges: %v", m.title, util.Matrix2Str(m.data), m.edges)
 }
 
 func newMtx(raw string) *card {
@@ -143,11 +151,13 @@ type graph struct {
 
 func (ma *graph) print() {
 	for k, v := range ma.Adj {
-		fmt.Printf("key: %d, val: %v\n", k, v)
+		fmt.Printf("key: %d, val: \n", k)
 		// util.PrintMatrix(v.data)
 		for e := v.Front(); e != nil; e = e.Next() {
-			fmt.Println(e.Value)
+			fmt.Printf("%v \t", e.Value)
 		}
+
+		fmt.Println("\n")
 	}
 }
 
@@ -220,19 +230,9 @@ func (ma *graph) pair() {
 			memo[e].Add(v.title)
 		}
 	}
-	// fmt.Println("memo: ", memo)
 
-	/*
-		for k, v := range memo {
-			if v.Cardinality() < 2 {
-				continue
-			} else if v.Cardinality() == 2 {
-				fmt.Println("[2]", k, v)
-			} else {
-				fmt.Println("[>2]", k, v)
-			}
-		}
-	*/
+	fmt.Println("memo: ")
+	spew.Dump(memo)
 
 	// ma.Adj
 	for _, v := range memo {
@@ -257,6 +257,8 @@ func (ma *graph) pair() {
 			}
 		}
 	}
+
+	return
 }
 
 // eleInList return true if v already exists in given linked list
@@ -309,8 +311,8 @@ func main() {
 	graph := newGraph(report)
 	// graph.print()
 	graph.pair()
+	spew.Dump(graph.index)
 	graph.print()
-	// fmt.Println(pairs)
 }
 
 /*
