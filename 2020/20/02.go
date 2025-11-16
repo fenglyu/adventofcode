@@ -65,6 +65,30 @@ func (m *card) rotate() *card {
 	return &flipc
 }
 
+type Transform func(r, c, n int) (int, int)
+
+var RotRight90 Transform = func(r, c, n int) (int, int) {
+	return c, n - 1 - r
+}
+
+var RotLeft90 Transform = func(r, c, n int) (int, int) {
+	return n - 1 - c, r
+}
+
+var Rot180 Transform = func(r, c, n int) (int, int) {
+	return n - 1 - r, n - 1 - c
+}
+
+var Rotations = []Transform{RotRight90, Rot180, RotLeft90}
+
+func rotateN(r, c, n, times int) (int, int) {
+	t := ((times % 4) + 4) % 4
+	for i := 0; i < t; i++ {
+		r, c = Rotations[0](r, c, n) // right rotation
+	}
+	return r, c
+}
+
 // reverse returns a copy of the provided edge with its bits flipped left to
 // right. The puzzle allows tiles to be rotated or mirrored, so every edge must
 // be considered in both directions when checking for matches.
@@ -151,10 +175,10 @@ type graph struct {
 
 func (ma *graph) print() {
 	for k, v := range ma.Adj {
-		fmt.Printf("key: %d, val: \n", k)
+		fmt.Printf("key: %d, val: ", k)
 		// util.PrintMatrix(v.data)
 		for e := v.Front(); e != nil; e = e.Next() {
-			fmt.Printf("%v \t", e.Value)
+			fmt.Printf("%v\t", e.Value)
 		}
 
 		fmt.Println("\n")
@@ -231,7 +255,7 @@ func (ma *graph) pair() {
 		}
 	}
 
-	fmt.Println("memo: ")
+	// fmt.Println("memo: ")
 	spew.Dump(memo)
 
 	// ma.Adj
