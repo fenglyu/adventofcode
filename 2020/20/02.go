@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
-	set "github.com/deckarep/golang-set/v2"
 	"github.com/fenglyu/adventofcode/util"
 )
 
@@ -243,30 +241,34 @@ func (ma *graph) pair() {
 		ma.index[tite] = card
 	}
 
-	memo := make(map[int]set.Set[int])
+	// memo := make(map[int]set.Set[int])
+	memo := make(map[int]map[int]bool) // directly use {'a': true, 'b': true} as set{'a', 'b'}
 
 	for _, v := range ma.index {
 		// fmt.Println("k: ", k, "v: ", v)
 		for _, e := range v.edges {
 			if _, Ok := memo[e]; !Ok {
-				memo[e] = set.NewSet[int]()
+				// memo[e] = set.NewSet[int]()
+				memo[e] = make(map[int]bool)
 			}
-			memo[e].Add(v.title)
+			// memo[e].Add(v.title)
+			memo[e][v.title] = true
 		}
 	}
 
 	// fmt.Println("memo: ")
-	spew.Dump(memo)
+	// spew.Dump(memo)
 
 	// ma.Adj
 	for _, v := range memo {
-		if v.Cardinality() < 2 {
+		// if v.Cardinality() < 2 {
+		if len(v) < 2 {
 			// skip card's edge that has no neighbours
 			continue
 		}
 
-		for _, q := range v.ToSlice() {
-			for _, p := range v.ToSlice() {
+		for q := range v {
+			for p := range v {
 				if q == p {
 					continue
 				}
@@ -306,15 +308,6 @@ func newGraph(raw []string) *graph {
 	index := make(map[int]*card, len(raw))
 	for _, v := range raw {
 		card := newMtx(v)
-		/*
-			buf := new(bytes.Buffer)
-			err := binary.Write(buf, binary.LittleEndian, res[i].title)
-			if err != nil {
-				fmt.Println("binary.Write failed:", err)
-			}
-			id := xxhash.Sum64(buf.Bytes())
-			index[id.(int)] = res[i]
-		*/
 		if card == nil {
 			continue
 		}
@@ -335,8 +328,20 @@ func main() {
 	graph := newGraph(report)
 	// graph.print()
 	graph.pair()
-	spew.Dump(graph.index)
-	graph.print()
+	// spew.Dump(graph.index)
+	// graph.print()
+	// problem 1
+	prod := 1
+
+	for t, v := range graph.Adj {
+		if v.Len() == 2 {
+			prod *= t
+		}
+	}
+
+	fmt.Printf("problem 1: %d\n", prod)
+
+	// problem 2
 }
 
 /*
