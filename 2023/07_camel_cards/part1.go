@@ -46,7 +46,8 @@ func (h *Hand) String() string {
 		restCards[i] = Val2Card[val]
 	}
 	return fmt.Sprintf("%s %d", h.Cards, h.Bid)
-	//return fmt.Sprintf("Cards: %s, Bid: %d, Type: %v, largest: %d, second: %v, Rest: %v", h.Cards, h.Bid, h.Type, h.Largest, h.Second, string(restCards))
+	// return fmt.Sprintf("Cards: %s, Bid: %d, Type: %v, largest: %d, second: %v, Rest: %v", h.Cards, h.Bid, h.Type,
+	// h.Largest, h.Second, string(restCards))
 }
 
 func InitHand(s string) *Hand {
@@ -82,7 +83,8 @@ func generateLists(bucket []uint8) ([]uint8, []uint8, []uint8) {
 	}
 
 	sort.Slice(pairs, func(i, j int) bool {
-		return pairs[i].Occurence > pairs[j].Occurence || (pairs[i].Occurence == pairs[j].Occurence && pairs[i].Index > pairs[j].Index)
+		return pairs[i].Occurence > pairs[j].Occurence ||
+			(pairs[i].Occurence == pairs[j].Occurence && pairs[i].Index > pairs[j].Index)
 	})
 
 	// Extract indices and occurrences

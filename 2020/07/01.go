@@ -48,7 +48,8 @@ func main() {
 				result = append(result, trimStr)
 			}
 
-			//var re = regexp.MustCompile(`(?:[a-z\ ]*) bag[s].*(\d{1,}) (?:[a-z\ ]*) bag[s]?(?:\, (\d{1,}) (?:[a-z\ ]*) bag[s])?.`)
+			// var re = regexp.MustCompile(`(?:[a-z\ ]*) bag[s].*(\d{1,}) (?:[a-z\ ]*) bag[s]?(?:\, (\d{1,}) (?:[a-z\
+			// ]*) bag[s])?.`)
 			re := regexp.MustCompile(`\d{1,}`)
 			m := re.FindAllString(v, -1)
 			for _, v := range m {

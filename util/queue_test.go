@@ -19,7 +19,7 @@ func TestLIFOEnqueue(t *testing.T) {
 	}
 }
 
-//  go test -timeout 30s -run ^TestFIFODequeue$ github.com/fenglyu/adventofcode/util -v
+// go test -timeout 30s -run ^TestFIFODequeue$ github.com/fenglyu/adventofcode/util -v
 func TestFIFODequeue(t *testing.T) {
 	f := NewFIFO()
 	//f.Init()

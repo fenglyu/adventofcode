@@ -1,0 +1,9 @@
+# Install golines once: go install github.com/segmentio/golines@latest
+repos:
+  - repo: local
+    hooks:
+      - id: golines
+        name: golines (auto-wrap long lines, code + comments)
+        entry: golines -w -m 120 -t 4 --shorten-comments
+        language: system
+        types: [go]

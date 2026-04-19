@@ -17,37 +17,33 @@ func newNode() *Node{
 // https://go.dev/play/p/n-vgwP6Xlix
 type Graph struct {
 	numVertices int
-	adjList  []*list.List
-	isDirected bool
+	adjList     []*list.List
+	isDirected  bool
 }
 
-func createGraph(vertices int ,isDirected bool ) *Graph{
-	adjlist:=make([]*list.List,0, vertices)
-	for i:=0; i<vertices; i++{
+func createGraph(vertices int, isDirected bool) *Graph {
+	adjlist := make([]*list.List, 0, vertices)
+	for i := 0; i < vertices; i++ {
 		adjlist[i] = list.New()
 	}
 
 	g := Graph{
 		numVertices: vertices,
-		adjList: adjlist,
-		isDirected: isDirected,
+		adjList:     adjlist,
+		isDirected:  isDirected,
 	}
 	return &g
 }
-  
 
-func (g *Graph) addEdge(dst any, src any){
+func (g *Graph) addEdge(dst any, src any) {
 	// add edge from src to dst
 
 }
 
-
-
-
-func main(){
+func main() {
 
 	vertices := 5
-	isDirected :=false
+	isDirected := false
 	g := createGraph(vertices, isDirected)
 
 	fmt.Println(g)

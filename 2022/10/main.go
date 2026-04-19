@@ -8,7 +8,16 @@ import (
 	"github.com/fenglyu/adventofcode/util"
 )
 
-var char map[uint8]uint8 = map[uint8]uint8{')': '(', ']': '[', '}': '{', '>': '<', '(': ')', '[': ']', '{': '}', '<': '>'}
+var char map[uint8]uint8 = map[uint8]uint8{
+	')': '(',
+	']': '[',
+	'}': '{',
+	'>': '<',
+	'(': ')',
+	'[': ']',
+	'{': '}',
+	'<': '>',
+}
 
 func main() {
 	report := util.ParseBasedOnEachLine()

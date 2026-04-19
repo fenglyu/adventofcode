@@ -73,7 +73,8 @@ func genLists(bucket []uint8) ([]uint8, []uint8) {
 	}
 
 	sort.Slice(pairs, func(i, j int) bool {
-		return pairs[i].Occurence > pairs[j].Occurence || (pairs[i].Occurence == pairs[j].Occurence && pairs[i].Index > pairs[j].Index)
+		return pairs[i].Occurence > pairs[j].Occurence ||
+			(pairs[i].Occurence == pairs[j].Occurence && pairs[i].Index > pairs[j].Index)
 	})
 
 	// Extract indices and occurrences
