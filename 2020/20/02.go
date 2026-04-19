@@ -3,6 +3,8 @@ package main
 import (
 	"container/list"
 	"fmt"
+	"math"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -165,10 +167,41 @@ type vertex struct {
 }
 
 type graph struct {
+	// Grid
+	Grid [][]*card
 	// Adj []*list.List
 	Adj map[int]*list.List
 	// data  []card
 	index map[int]*card
+}
+
+type ByAdjBorderNum struct {
+	Adj   map[int]*list.List
+	Order []int
+}
+
+// Return the Graph's Adj to order by tile's boarders number
+func NewByAdjBorderNum(Adj map[int]*list.List) *ByAdjBorderNum {
+	orders := make([]int, 0, len(Adj))
+	for k := range Adj {
+		orders = append(orders, k)
+	}
+	return &ByAdjBorderNum{Adj: Adj, Order: orders}
+}
+
+func (b *ByAdjBorderNum) Less(i, j int) bool {
+	ai, bj := b.Order[i], b.Order[j]
+	// order in desc
+	return b.Adj[ai].Len() > b.Adj[bj].Len()
+}
+
+func (b *ByAdjBorderNum) Swap(i, j int) {
+	// ai, bj := b.Order[i], b.Order[j]
+	b.Order[i], b.Order[j] = b.Order[j], b.Order[i]
+}
+
+func (b *ByAdjBorderNum) Len() int {
+	return len(b.Adj)
 }
 
 func (ma *graph) print() {
@@ -182,57 +215,6 @@ func (ma *graph) print() {
 		fmt.Println("\n")
 	}
 }
-
-// pair builds an adjacency list keyed by tile id. Every tile id maps to the set
-// of other tiles that share at least one matching edge (in either orientation).
-// The adjacency map makes it straightforward for later steps of the solution to
-// reason about how tiles can be stitched together into the final image.
-/*
-func (ma *graph) pair() map[int]set.Set[int] {
-	for i := range ma.data {
-		card := ma.data[i]
-		card.setEdges()
-		ma.data[i] = card
-	}
-	memo := make(map[int]set.Set[int])
-
-	for _, card := range ma.data {
-		for _, e := range card.edges {
-			if _, ok := memo[e]; !ok {
-				memo[e] = set.NewSet[int]()
-			}
-			memo[e].Add(card.title)
-		}
-	}
-
-	fmt.Println("memo: ", memo)
-	adjacency := make(map[int]set.Set[int])
-	for _, tiles := range memo {
-		if tiles.Cardinality() < 2 {
-			continue
-		}
-
-		ids := make([]int, 0, tiles.Cardinality())
-		for v := range tiles.Iter() {
-			ids = append(ids, v)
-		}
-
-		for i := range ids {
-			for j := range ids {
-				if i == j {
-					continue
-				}
-				if _, ok := adjacency[ids[i]]; !ok {
-					adjacency[ids[i]] = set.NewSet[int]()
-				}
-				adjacency[ids[i]].Add(ids[j])
-			}
-		}
-	}
-
-	return adjacency
-}
-*/
 
 func (ma *graph) pair() {
 	for tite, c := range ma.index {
@@ -304,6 +286,8 @@ func newGraph(raw []string) *graph {
 		return nil
 	}
 	// res := make([]card, len(raw))
+	gridSize := int(math.Sqrt(float64(len(raw))))
+	grid := make([][]*card, gridSize)
 	adj := make(map[int]*list.List)
 	index := make(map[int]*card, len(raw))
 	for _, v := range raw {
@@ -315,7 +299,14 @@ func newGraph(raw []string) *graph {
 		adj[card.title] = list.New()
 
 	}
-	return &graph{Adj: adj, index: index}
+	return &graph{Adj: adj, index: index, Grid: grid}
+}
+
+// placement will ajust the card's 2d placement in the grid
+func (ma *graph) PlaceMent() {
+	// place the central card first, L * L grid, central position (L/2, L/2)
+
+	// for each edge of first card,
 }
 
 func main() {
@@ -342,6 +333,19 @@ func main() {
 	fmt.Printf("problem 1: %d\n", prod)
 
 	// problem 2
+	bdNum := NewByAdjBorderNum(graph.Adj)
+	sort.Sort(bdNum)
+
+	fmt.Println("boarder number: ", bdNum)
+	for _, tile := range bdNum.Order {
+		fmt.Printf("tile : %d\t", tile)
+		fmt.Printf("Adj: ")
+		adj := graph.Adj[tile]
+		for e := adj.Front(); e != nil; e = e.Next() {
+			fmt.Printf("%v\t", e.Value)
+		}
+		fmt.Println("")
+	}
 }
 
 /*
