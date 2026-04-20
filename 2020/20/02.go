@@ -224,6 +224,8 @@ func (ma *graph) pair() {
 	}
 
 	// memo := make(map[int]set.Set[int])
+	// how many card share which edge
+	// edge -> {card0, card1, ...}
 	memo := make(map[int]map[int]bool) // directly use {'a': true, 'b': true} as set{'a', 'b'}
 
 	for _, v := range ma.index {
@@ -304,9 +306,54 @@ func newGraph(raw []string) *graph {
 
 // placement will ajust the card's 2d placement in the grid
 func (ma *graph) PlaceMent() {
-	// place the central card first, L * L grid, central position (L/2, L/2)
+	// > https://www.geeksforgeeks.org/artificial-intelligence/explain-the-concept-of-backtracking-search-and-its-role-in-finding-solutions-to-csps/
+	// contraint satification problem(CSP)
+	// Variables: a set of variables, X1.. Xn
+	// Domains: Each variable Xi has a domain Di of possible values
+	// Constraits: A set of contraints that specify allowable combinations of values for subsets of values
 
-	// for each edge of first card,
+	// The goal in a CSP is to assign values to all variables from their respective domains such that all constraints are satisfied.
+	/*
+		Sudoku: Filling a 9x9 grid with digits so that each row, column, and 3x3 subgrid contains all digits from 1 to 9 without repetition.
+		Map Coloring: Coloring a map with a limited number of colors so that no adjacent regions share the same color.
+		N-Queens: Placing N queens on an N×N chessboard so that no two queens threaten each other.
+	*/
+
+	// 1. init the board
+	for i := range ma.Grid {
+		ma.Grid[i] = make([]*card, len(ma.Grid))
+	}
+
+	// 2. Solve the problem
+	N := 0
+	res := Solve(ma.Grid, 0, N)
+	if res {
+		PrintBoard(ma.Grid, N)
+	} else {
+		fmt.Println("no solution exists")
+	}
+
+	// 3.
+}
+
+// isRightPlace define is exsting card are in right order
+func IsRightPlace(board [][]*card, row int, col int, N int) bool {
+	return true
+}
+
+func Solve(board [][]*card, tile int, N int) bool {
+	// if the card(with tile) can't be placed in any places, return false
+
+	return false
+}
+
+func PrintBoard(board [][]*card, N int) {
+	for i := 0; i < N; i++ {
+		for j := 0; j < N; j++ {
+			fmt.Printf("[%d, %d]-> card: %v", i, j, board[i][j])
+		}
+		fmt.Println("")
+	}
 }
 
 func main() {
@@ -346,6 +393,8 @@ func main() {
 		}
 		fmt.Println("")
 	}
+
+	// backtracking
 }
 
 /*
